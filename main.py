@@ -25,12 +25,10 @@ async def root():
 
 @app.get("/tasks")
 async def get_python_tasks():
-    # Отправляем запрос к OpenRouter API
     response = requests.post(API_URL, headers=headers, json=data)
 
     if response.status_code == 200:
         result = response.json()
-        # Возвращаем только сгенерированный контент
         content = result['choices'][0]['message']['content']
         return {"tasks": content}
     else:
