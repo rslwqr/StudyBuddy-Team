@@ -5,7 +5,11 @@ from sqlalchemy.orm import sessionmaker
 from models import Base, User, Syllabus, Message
 from syllabus import parse_pdf
 import requests
-
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
+from fastapi import Depends
+from models import User
+from pydantic import BaseModel
 
 DATABASE_URL = "sqlite:///./studybuddy.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -13,6 +17,13 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base.metadata.create_all(bind=engine)
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 def get_db():
     db = SessionLocal()
@@ -21,13 +32,21 @@ def get_db():
     finally:
         db.close()
 
+class RegisterRequest(BaseModel):
+    name: str
+    email:str
+
 @app.post("/register")
-def register_user(name: str, email: str, db: Session = Depends(get_db)):
-    user = User(name=name, email=email)
+def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
+    user = User(name=data.name, email=data.email)
     db.add(user)
     db.commit()
     db.refresh(user)
     return {"user_id": user.id}
+
+@app.get("/users")
+def get_users(db: Session = Depends(get_db)):
+    return db.query(User).all()
 
 @app.post("/upload_syllabus")
 async def upload_syllabus(user_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
