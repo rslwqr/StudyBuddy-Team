@@ -1,8 +1,12 @@
 from PyPDF2 import PdfReader
+import io
 
-def load_syllabus(pdf_path: str = "pythonSyllabus.pdf") -> str:
-    reader = PdfReader(pdf_path)
+def parse_pdf(contents: bytes) -> str:
+    reader = PdfReader(io.BytesIO(contents))
     full_text = ""
     for page in reader.pages:
-        full_text += page.extract_text()
+        page_text = page.extract_text()
+        if page_text:
+            full_text += page_text
     return full_text
+
