@@ -9,7 +9,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from models import User
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, validator
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
 DATABASE_URL = "sqlite:///./studybuddy.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -19,7 +21,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173", "http://127.0.0.1:5174", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -34,15 +36,29 @@ def get_db():
 
 class RegisterRequest(BaseModel):
     name: str
-    email:str
+    email: EmailStr
+
+    @validator("email")
+    def check_domain(cls, v):
+        if not v.endswith("@innopolis.university"):
+            raise ValueError("Email must end with @innopolis.university")
+        return v
+
 
 @app.post("/register")
 def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == data.email).first()
+    if existing:
+        return {"user_id": existing.id, "existing": True}
     user = User(name=data.name, email=data.email)
     db.add(user)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(400, "Email already registered")
     db.refresh(user)
-    return {"user_id": user.id}
+    return {"user_id": user.id, "existing": False}
 
 @app.get("/users")
 def get_users(db: Session = Depends(get_db)):
