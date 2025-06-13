@@ -78,8 +78,7 @@ async def upload_syllabus(user_id: int, file: UploadFile = File(...), db: Sessio
     db.refresh(syllabus)
     return {"syllabus_id": syllabus.id}
 
-API_KEY = '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'
-API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+
 
 @app.get("/download_syllabus")
 def download_syllabus(user_id: int, db: Session = Depends(get_db)):
