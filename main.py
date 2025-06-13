@@ -12,6 +12,7 @@ from models import User
 from pydantic import BaseModel, EmailStr, validator
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
+from fastapi.responses import FileResponse
 
 DATABASE_URL = "sqlite:///./studybuddy.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
@@ -49,7 +50,10 @@ class RegisterRequest(BaseModel):
 def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == data.email).first()
     if existing:
-        return {"user_id": existing.id, "existing": True}
+        raise HTTPException(
+            status_code=409,
+            detail="User with this email already exists"
+        )
     user = User(name=data.name, email=data.email)
     db.add(user)
     try:
@@ -58,7 +62,7 @@ def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(400, "Email already registered")
     db.refresh(user)
-    return {"user_id": user.id, "existing": False}
+    return {"user_id": user.id}
 
 @app.get("/users")
 def get_users(db: Session = Depends(get_db)):
@@ -76,6 +80,14 @@ async def upload_syllabus(user_id: int, file: UploadFile = File(...), db: Sessio
 
 API_KEY = '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'
 API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+
+@app.get("/download_syllabus")
+def download_syllabus(user_id: int, db: Session = Depends(get_db)):
+    syl = db.query(Syllabus).filter(Syllabus.user_id==user_id).order_by(Syllabus.id.desc()).first()
+    if not syl:
+        raise HTTPException(404, "No syllabus found")
+    return FileResponse(path=f"./uploads/{syl.filename}", media_type='application/pdf')
+
 
 @app.post("/chat")
 def chat(user_id: int, syllabus_id: int, content: str, db: Session = Depends(get_db)):
