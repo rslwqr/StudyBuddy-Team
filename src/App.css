@@ -1,0 +1,35 @@
+/* затемнение под модалкой */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+/* окно самой формы */
+.modal-content {
+  position: relative;
+  background: #F9F7F0;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+}
+
+/* крестик */
+.modal-close {
+  position: absolute;
+  top: -20px;
+  right: -14px;
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: #2E7A53;
+}
