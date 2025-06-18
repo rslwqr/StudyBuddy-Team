@@ -3,7 +3,10 @@
     flex-direction: column;
     height: 100vh;
     font-family: 'Instrument Sans', sans-serif;
+    background-color: #F9F7F0;
+    justify-content: space-between; /* чтобы input внизу */
 }
+
 
 .chat-header {
     background-color: #2E7A53;
@@ -13,6 +16,7 @@
     font-weight: bold;
 }
 
+/* Сообщения */
 .chat-messages {
     flex: 1;
     padding: 1rem 2rem;
@@ -20,48 +24,94 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
-    background-color: #F9F7F0;
 }
 
 .chat-message {
-    padding: 0.75rem 1rem;
+    padding: 0.75rem 1.2rem;
     border-radius: 1rem;
     max-width: 70%;
     word-wrap: break-word;
+    background-color: white;
+    border: 1px solid black;
+    font-size: 16px;
+    line-height: 1.4;
 }
 
 .chat-message.user {
     align-self: flex-end;
-    background-color: #DCF8C6;
 }
 
 .chat-message.bot {
     align-self: flex-start;
-    background-color: #E5E5EA;
 }
 
-.chat-input-area {
-    display: flex;
-    padding: 1rem 2rem;
-    background-color: #fff;
-    border-top: 1px solid #ddd;
-}
-
-.chat-input-area input {
+/* Приветствие */
+.chat-welcome {
     flex: 1;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 2rem;
-    font-size: 1rem;
-    outline: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
 }
 
-.chat-input-area button {
-    margin-left: 1rem;
-    padding: 0.75rem 1.5rem;
-    background-color: #2E7A53;
-    color: white;
-    border: none;
+.chat-welcome h1 {
+    font-size: 48px;
+    font-weight: bold;
+    color: #000;
+    margin-bottom: 0.5rem;
+}
+
+.chat-welcome p {
+    font-size: 18px;
+    color: #333;
+    margin: 0;
+}
+
+.chat-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;     /* ⬅️ выравнивание по горизонтали */
+    margin: 1rem auto;           /* ⬅️ центрирует элемент */
+    max-width: 800px;            /* ⬅️ ограничивает ширину */
+    width: 100%;
+}
+
+
+.chat-input-wrapper input {
+    width: 80%;
+    padding: 0.75rem 3.5rem 0.75rem 1rem;
+    font-size: 1rem;
+    border: 2px solid #000;
     border-radius: 2rem;
+    outline: none;
+    background-color: #fff;
+    font-family: 'Instrument Sans', sans-serif;
+
+}
+
+/* Кнопка со стрелкой */
+.input-send-button {
+    position: absolute;
+    right: 1rem;
+    background: #fff;
+    border: 2px solid #000;
+    border-radius: 50%;
+    padding: 0.5rem;
     cursor: pointer;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: -22%;
+    left: 89.5%;
+}
+
+.input-send-button svg {
+    width: 16px;
+    height: 16px;
+    stroke: #000;
 }
