@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import SyllabusPage from './pages/SyllabusPage'
-import ProfilePage from './pages/ProfilePage' // ✅ добавь это!
+import ProfilePage from './pages/ProfilePage'
+import ChatPage from './pages/ChatPage' // ✅ добавили
+
 import './App.css'
 
 export default function App() {
@@ -40,7 +42,8 @@ export default function App() {
                     }
                 />
                 <Route path="/syllabus" element={<SyllabusPage />} />
-                <Route path="/profile" element={<ProfilePage />} /> {/* ✅ вот это добавь */}
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/chat" element={<ChatPage />} /> {/* ✅ новый маршрут */}
             </Routes>
         </BrowserRouter>
     )

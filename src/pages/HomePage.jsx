@@ -1,10 +1,11 @@
-// src/pages/HomePage.jsx
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom' // ✅ добавили useNavigate
 import './HomePage.css'
 import logo from '../assets/logo.svg'
 import robot from '../assets/robot.png'
 
 export default function HomePage({ onRegisterClick }) {
+    const navigate = useNavigate() // ✅ создать навигатор
+
     return (
         <div className="page">
             <header className="top-bar">
@@ -31,12 +32,14 @@ export default function HomePage({ onRegisterClick }) {
                     </p>
 
                     <div className="button-group">
-                        <button className="start">Get Started</button>
+                        {/* ✅ добавили переход */}
+                        <button className="start" onClick={() => navigate('/chat')}>
+                            Get Started
+                        </button>
                         <Link to="/syllabus">
                             <button className="outline">Syllabus</button>
                         </Link>
                     </div>
-
                 </div>
                 <img src={robot} alt="StudyBuddy Robot" className="robot-img" />
             </main>
