@@ -40,6 +40,8 @@ function RegisterPage() {
                 const data = await res.json()
                 localStorage.setItem('user_id', data.user_id) // 💾 сохраняем
                 alert('Registration successful!')
+                localStorage.setItem('user_name', name)
+                localStorage.setItem('user_email', email)
             } else {
                 alert('Server error during registration')
             }

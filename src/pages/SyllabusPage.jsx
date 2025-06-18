@@ -1,4 +1,3 @@
-// src/pages/SyllabusPage.jsx
 import { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './SyllabusPage.css'
@@ -12,15 +11,7 @@ export default function SyllabusPage() {
     const navigate = useNavigate()
     const userId = localStorage.getItem('user_id')
 
-    // check registration
-    useEffect(() => {
-        if (!userId) {
-            alert('Please register first.')
-            navigate('/')
-        }
-    }, [userId, navigate])
-
-
+    // Загрузка силлабуса
     useEffect(() => {
         const fetchSyllabus = async () => {
             try {
@@ -42,6 +33,7 @@ export default function SyllabusPage() {
         }
     }, [userId])
 
+    // Загрузка PDF
     const handleUpload = async (e) => {
         const file = e.target.files[0]
         if (!file) return
@@ -65,6 +57,7 @@ export default function SyllabusPage() {
         }
     }
 
+    // Удаление PDF
     const handleRemove = async () => {
         try {
             const res = await fetch(`http://127.0.0.1:8000/syllabus?user_id=${userId}`, {
@@ -79,7 +72,7 @@ export default function SyllabusPage() {
     }
 
     const handleLogout = () => {
-        localStorage.removeItem('user_id')
+        localStorage.clear()
         navigate('/')
     }
 
