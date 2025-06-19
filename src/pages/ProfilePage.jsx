@@ -16,8 +16,8 @@ export default function ProfilePage() {
     return (
         <div className="profile-page">
             <header className="profile-header">
-                <button className="back-button" onClick={() => navigate(-1)}>← BACK</button>
-                <button className="logout" onClick={handleLogout}>LOG OUT</button>
+                <button className="back-button-profilepage" onClick={() => navigate(-1)}>← Back</button>
+                <button className="logout" onClick={handleLogout}>Log out</button>
             </header>
 
             <div className="profile-content">

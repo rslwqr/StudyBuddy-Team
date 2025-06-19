@@ -1,17 +1,26 @@
-import { Link, useNavigate } from 'react-router-dom' // ✅ добавили useNavigate
+import { Link, useNavigate } from 'react-router-dom'
 import './HomePage.css'
 import logo from '../assets/logo.svg'
 import robot from '../assets/robot.png'
 
 export default function HomePage({ onRegisterClick }) {
-    const navigate = useNavigate() // ✅ создать навигатор
+    const navigate = useNavigate()
+    const isLoggedIn = localStorage.getItem('user_id') // проверка регистрации
+
+    const handleChatAccess = () => {
+        if (!isLoggedIn) {
+            alert('Please register or log in to access the chat.')
+            return
+        }
+        navigate('/chat')
+    }
 
     return (
         <div className="page">
             <header className="top-bar">
                 <img src={logo} alt="StudyBuddy Logo" className="logo" />
                 <div className="top-bar-right">
-                    {!localStorage.getItem('user_id') ? (
+                    {!isLoggedIn ? (
                         <button className="register-link" onClick={onRegisterClick}>
                             Register
                         </button>
@@ -32,8 +41,7 @@ export default function HomePage({ onRegisterClick }) {
                     </p>
 
                     <div className="button-group">
-                        {/* ✅ добавили переход */}
-                        <button className="start" onClick={() => navigate('/chat')}>
+                        <button className="start" onClick={handleChatAccess}>
                             Get Started
                         </button>
                         <Link to="/syllabus">

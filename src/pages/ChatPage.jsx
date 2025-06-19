@@ -1,9 +1,11 @@
 import './ChatPage.css'
 import { useState } from 'react'
+import { useNavigate, Link } from 'react-router-dom'
 
 export default function ChatPage() {
     const [messages, setMessages] = useState([])
     const [input, setInput] = useState('')
+    const navigate = useNavigate()
 
     const handleSend = () => {
         if (!input.trim()) return
@@ -13,8 +15,24 @@ export default function ChatPage() {
 
     return (
         <div className="chat-container">
-            <div className="chat-header">StudyBuddy Chat</div>
+            {/* Шапка */}
+            <header className="chat-header">
+                <button className="back-button-chatpage" onClick={() => navigate('/')}>
+                    ← Back
+                </button>
 
+                <div className="chat-title">StudyBuddy Chat</div>
+
+                <Link to="/profile">
+                    <img
+                        src="/profile-icon.png"  // ✅ из public
+                        alt="Profile"
+                        className="chat-profile-icon"
+                    />
+                </Link>
+            </header>
+
+            {/* Сообщения или приветствие */}
             {messages.length === 0 ? (
                 <div className="chat-welcome">
                     <h1>Hello!</h1>
@@ -33,11 +51,11 @@ export default function ChatPage() {
                 </div>
             )}
 
-            {/* 👇 Поле ввода со встроенной кнопкой */}
+            {/* Поле ввода и кнопка отправки */}
             <div className="chat-input-wrapper">
                 <input
                     type="text"
-                    placeholder="Your text"
+                    placeholder="Write the number of the week or the topic to receive the task"
                     value={input}
                     onChange={e => setInput(e.target.value)}
                     onKeyDown={e => e.key === 'Enter' && handleSend()}

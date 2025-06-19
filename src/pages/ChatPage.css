@@ -4,27 +4,81 @@
     height: 100vh;
     font-family: 'Instrument Sans', sans-serif;
     background-color: #F9F7F0;
-    justify-content: space-between; /* чтобы input внизу */
+    justify-content: space-between;
 }
-
 
 .chat-header {
-    background-color: #2E7A53;
+    background-color: #2d7a52;
     color: white;
-    padding: 1rem 2rem;
-    font-size: 1.5rem;
-    font-weight: bold;
+    padding: 0.5rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
 }
 
-/* Сообщения */
+.chat-title {
+    position: absolute;
+    left: 50%;
+    color: white;
+    transform: translateX(-50%);
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.back-button-chatpage {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+
+
+.chat-profile-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+
+.chat-message.user {
+    align-self: flex-end;
+    background-color: #fff;
+    border: 2px solid #8B8585;
+    font-size: 16px;
+    line-height: 1.4;
+    padding: 0.75rem 1.2rem;
+    max-width: 70%;
+    word-wrap: break-word;
+
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-left-radius: 30px;
+    border-bottom-right-radius: 0px;
+}
+
+
 .chat-messages {
     flex: 1;
     padding: 1rem 2rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
     gap: 1rem;
 }
+
+.chat-message.bot {
+    align-self: flex-start;
+    background-color: white;
+    border: 2px solid #333;
+    border-radius: 1rem 1rem 1rem 0;
+}
+
 
 .chat-message {
     padding: 0.75rem 1.2rem;
@@ -45,7 +99,7 @@
     align-self: flex-start;
 }
 
-/* Приветствие */
+/* === Welcome screen === */
 .chat-welcome {
     flex: 1;
     display: flex;
@@ -69,35 +123,35 @@
     margin: 0;
 }
 
+/* === Input === */
 .chat-input-wrapper {
     position: relative;
     display: flex;
     align-items: center;
-    justify-content: center;     /* ⬅️ выравнивание по горизонтали */
-    margin: 1rem auto;           /* ⬅️ центрирует элемент */
-    max-width: 800px;            /* ⬅️ ограничивает ширину */
+    justify-content: center;
+    margin: 1rem auto;
+    max-width: 800px;
     width: 100%;
 }
 
-
 .chat-input-wrapper input {
     width: 80%;
-    padding: 0.75rem 3.5rem 0.75rem 1rem;
+    padding: 0.5rem 3.5rem 0.75rem 1rem;
     font-size: 1rem;
-    border: 2px solid #000;
+    border: 2px solid #445450;
     border-radius: 2rem;
     outline: none;
     background-color: #fff;
     font-family: 'Instrument Sans', sans-serif;
-
 }
 
-/* Кнопка со стрелкой */
+/* === Send button (arrow) === */
 .input-send-button {
     position: absolute;
-    right: 1rem;
+    right: 5.8%;
+    top: -28%;
     background: #fff;
-    border: 2px solid #000;
+    border: 2px solid #445450;
     border-radius: 50%;
     padding: 0.5rem;
     cursor: pointer;
@@ -106,12 +160,23 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    top: -22%;
-    left: 89.5%;
 }
 
 .input-send-button svg {
     width: 16px;
     height: 16px;
-    stroke: #000;
+    stroke: #445450;
 }
+
+
+.chat-profile-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: white;
+    padding: 4px;
+    box-shadow: 0 0 0 2px #F6B274; /* опционально: добавляет оранжевую рамку */
+    cursor: pointer;
+    object-fit: cover;
+}
+
