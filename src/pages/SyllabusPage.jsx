@@ -18,11 +18,15 @@ export default function SyllabusPage() {
                 const res = await fetch(`http://127.0.0.1:8000/download_syllabus?user_id=${userId}`)
                 if (!res.ok) {
                     setStatus('No syllabus uploaded yet.')
+                    localStorage.removeItem('syllabus_uploaded')
                     return
                 }
                 const blob = await res.blob()
                 setPdfUrl(URL.createObjectURL(blob))
                 setStatus('')
+
+                // ✅ Сохраняем флаг, если файл успешно загрузился
+                localStorage.setItem('syllabus_uploaded', 'true')
             } catch {
                 setStatus('Failed to load syllabus')
             }
@@ -52,11 +56,13 @@ export default function SyllabusPage() {
             const blob = new Blob([file], { type: 'application/pdf' })
             setPdfUrl(URL.createObjectURL(blob))
             setStatus('Syllabus uploaded successfully')
+
+            // ✅ Сохраняем флаг в localStorage
+            localStorage.setItem('syllabus_uploaded', 'true')
         } catch {
             setStatus('Upload failed')
         }
     }
-
     // Удаление PDF
     const handleRemove = async () => {
         try {

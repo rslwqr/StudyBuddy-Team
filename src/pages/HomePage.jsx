@@ -5,11 +5,16 @@ import robot from '../assets/robot.png'
 
 export default function HomePage({ onRegisterClick }) {
     const navigate = useNavigate()
-    const isLoggedIn = localStorage.getItem('user_id') // проверка регистрации
+    const isLoggedIn = localStorage.getItem('user_id')
+    const syllabusUploaded = localStorage.getItem('syllabus_uploaded') // ✅ проверка на силабус
 
     const handleChatAccess = () => {
         if (!isLoggedIn) {
             alert('Please register or log in to access the chat.')
+            return
+        }
+        if (!syllabusUploaded) {
+            alert('Please upload your syllabus before using the chat.')
             return
         }
         navigate('/chat')

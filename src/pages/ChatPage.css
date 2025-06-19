@@ -60,6 +60,21 @@
     border-bottom-right-radius: 0px;
 }
 
+.chat-message.bot {
+    align-self: flex-end;
+    background-color: #fff;
+    border: 2px solid #8B8585;
+    font-size: 16px;
+    line-height: 1.4;
+    padding: 0.75rem 1.2rem;
+    max-width: 70%;
+    word-wrap: break-word;
+
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 30px;
+}
 
 .chat-messages {
     flex: 1;
@@ -75,7 +90,6 @@
 .chat-message.bot {
     align-self: flex-start;
     background-color: white;
-    border: 2px solid #333;
     border-radius: 1rem 1rem 1rem 0;
 }
 

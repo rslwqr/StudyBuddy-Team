@@ -1,21 +1,46 @@
-import './ChatPage.css'
-import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import './ChatPage.css';
+import { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
 export default function ChatPage() {
-    const [messages, setMessages] = useState([])
-    const [input, setInput] = useState('')
-    const navigate = useNavigate()
+    const [messages, setMessages] = useState([]);
+    const [input, setInput] = useState('');
+    const navigate = useNavigate();
 
-    const handleSend = () => {
-        if (!input.trim()) return
-        setMessages(prev => [...prev, { sender: 'user', text: input }])
-        setInput('')
-    }
+    // 🔒 Заменить при необходимости на данные из localStorage
+    const user_id = 3;
+    const syllabus_id = 2;
+
+    const handleSend = async () => {
+        if (!input.trim()) return;
+
+        const userMessage = { sender: 'user', text: input };
+        setMessages(prev => [...prev, userMessage]);
+        setInput(''); // ✅ очищаем сразу после ввода
+
+        try {
+            const res = await fetch(
+                `http://localhost:8000/chat?user_id=${user_id}&syllabus_id=${syllabus_id}&content=${encodeURIComponent(input)}`,
+                { method: 'POST' }
+            );
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.detail || 'Unknown error');
+            }
+
+            const data = await res.json();
+            const botMessage = { sender: 'bot', text: data.reply };
+            setMessages(prev => [...prev, botMessage]);
+        } catch (err) {
+            console.error('❌ Error in /chat:', err);
+            setMessages(prev => [...prev, { sender: 'bot', text: '⚠ AI error: could not respond.' }]);
+        }
+    };
 
     return (
         <div className="chat-container">
-            {/* Шапка */}
+            {/* Header */}
             <header className="chat-header">
                 <button className="back-button-chatpage" onClick={() => navigate('/')}>
                     ← Back
@@ -25,14 +50,14 @@ export default function ChatPage() {
 
                 <Link to="/profile">
                     <img
-                        src="/profile-icon.png"  // ✅ из public
+                        src="/profile-icon.png"
                         alt="Profile"
                         className="chat-profile-icon"
                     />
                 </Link>
             </header>
 
-            {/* Сообщения или приветствие */}
+            {/* Chat content */}
             {messages.length === 0 ? (
                 <div className="chat-welcome">
                     <h1>Hello!</h1>
@@ -51,7 +76,7 @@ export default function ChatPage() {
                 </div>
             )}
 
-            {/* Поле ввода и кнопка отправки */}
+            {/* Input */}
             <div className="chat-input-wrapper">
                 <input
                     type="text"
@@ -82,5 +107,5 @@ export default function ChatPage() {
                 </button>
             </div>
         </div>
-    )
+    );
 }
