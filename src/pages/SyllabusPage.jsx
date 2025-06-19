@@ -53,11 +53,13 @@ export default function SyllabusPage() {
 
             if (!res.ok) throw new Error()
 
+            const data = await res.json()
+            const syllabusId = data.syllabus_id
+            localStorage.setItem('syllabus_id', syllabusId)  // ⬅️ ВАЖНО!!!
+
             const blob = new Blob([file], { type: 'application/pdf' })
             setPdfUrl(URL.createObjectURL(blob))
             setStatus('Syllabus uploaded successfully')
-
-            // ✅ Сохраняем флаг в localStorage
             localStorage.setItem('syllabus_uploaded', 'true')
         } catch {
             setStatus('Upload failed')

@@ -1,46 +1,71 @@
 import './ChatPage.css';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 
 export default function ChatPage() {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const navigate = useNavigate();
 
-    // 🔒 Заменить при необходимости на данные из localStorage
-    const user_id = 3;
-    const syllabus_id = 2;
+    const user_id = parseInt(localStorage.getItem("user_id"));
+    const syllabus_id = parseInt(localStorage.getItem("syllabus_id"));
+
+    useEffect(() => {
+        if (!user_id || !syllabus_id) {
+            alert("You must be logged in and upload your syllabus before using the chat.");
+            navigate('/');
+        }
+    }, [user_id, syllabus_id, navigate]);
 
     const handleSend = async () => {
         if (!input.trim()) return;
 
         const userMessage = { sender: 'user', text: input };
         setMessages(prev => [...prev, userMessage]);
-        setInput(''); // ✅ очищаем сразу после ввода
+        setInput('');
 
         try {
-            const res = await fetch(
-                `http://localhost:8000/chat?user_id=${user_id}&syllabus_id=${syllabus_id}&content=${encodeURIComponent(input)}`,
-                { method: 'POST' }
-            );
+            const payload = {
+                user_id: user_id,
+                syllabus_id: syllabus_id,
+                content: input
+            };
+
+            console.log("📤 Sending to backend:", payload);
+
+            const res = await fetch('http://localhost:8000/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+            });
 
             if (!res.ok) {
                 const errorData = await res.json();
+                console.error('❌ Server responded with:', errorData);
                 throw new Error(errorData.detail || 'Unknown error');
             }
 
             const data = await res.json();
-            const botMessage = { sender: 'bot', text: data.reply };
+
+            const botMessage = {
+                sender: 'bot',
+                text: data.reply // теперь не очищаем Markdown, он будет отрисован красиво через ReactMarkdown
+            };
             setMessages(prev => [...prev, botMessage]);
         } catch (err) {
             console.error('❌ Error in /chat:', err);
-            setMessages(prev => [...prev, { sender: 'bot', text: '⚠ AI error: could not respond.' }]);
+            setMessages(prev => [
+                ...prev,
+                { sender: 'bot', text: '⚠ AI error: could not respond.' },
+            ]);
         }
     };
 
     return (
         <div className="chat-container">
-            {/* Header */}
             <header className="chat-header">
                 <button className="back-button-chatpage" onClick={() => navigate('/')}>
                     ← Back
@@ -57,7 +82,6 @@ export default function ChatPage() {
                 </Link>
             </header>
 
-            {/* Chat content */}
             {messages.length === 0 ? (
                 <div className="chat-welcome">
                     <h1>Hello!</h1>
@@ -70,13 +94,16 @@ export default function ChatPage() {
                             key={idx}
                             className={`chat-message ${msg.sender === 'user' ? 'user' : 'bot'}`}
                         >
-                            {msg.text}
+                            {msg.sender === 'bot' ? (
+                                <ReactMarkdown>{msg.text}</ReactMarkdown>
+                            ) : (
+                                msg.text
+                            )}
                         </div>
                     ))}
                 </div>
             )}
 
-            {/* Input */}
             <div className="chat-input-wrapper">
                 <input
                     type="text"
