@@ -10,7 +10,8 @@ from fastapi.responses import FileResponse
 from pydantic import BaseModel, EmailStr, validator
 from sqlalchemy.exc import IntegrityError
 from models import Topic, Task
-
+import json
+import re
 
 from dotenv import load_dotenv
 import os
@@ -23,7 +24,6 @@ DATABASE_URL = "sqlite:///./studybuddy.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
-
 
 app = FastAPI()
 
@@ -70,7 +70,6 @@ def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
     db.refresh(user)
     return {"user_id": user.id}
 
-
 @app.get("/users")
 def get_users(db: Session = Depends(get_db)):
     return db.query(User).all()
@@ -80,8 +79,8 @@ async def upload_syllabus(user_id: int, file: UploadFile = File(...), db: Sessio
     contents = await file.read()
 
     from syllabus import parse_pdf
-    syllabus_text = parse_pdf(contents)
-    syllabus = Syllabus(filename=file.filename, content=syllabus_text, user_id=user_id)
+    syllabus_dict = parse_pdf(contents)
+    syllabus = Syllabus(filename=file.filename, content=json.dumps(syllabus_dict), user_id=user_id)
     db.add(syllabus)
     db.commit()
     db.refresh(syllabus)
@@ -92,7 +91,6 @@ async def upload_syllabus(user_id: int, file: UploadFile = File(...), db: Sessio
         f.write(contents)
 
     return {"syllabus_id": syllabus.id}
-
 
 @app.get("/download_syllabus")
 def download_syllabus(user_id: int, db: Session = Depends(get_db)):
@@ -106,10 +104,16 @@ def download_syllabus(user_id: int, db: Session = Depends(get_db)):
 
     return FileResponse(path=path, media_type="application/pdf")
 
-
+class ChatRequest(BaseModel):
+    user_id: int
+    syllabus_id: int
+    content: str
 
 @app.post("/chat")
-def chat(user_id: int, syllabus_id: int, content: str, db: Session = Depends(get_db)):
+def chat(req: ChatRequest, db: Session = Depends(get_db)):
+    user_id = req.user_id
+    syllabus_id = req.syllabus_id
+    content = req.content
     msg_user = Message(sender="user", content=content, user_id=user_id, syllabus_id=syllabus_id)
     db.add(msg_user)
     db.commit()
@@ -119,7 +123,39 @@ def chat(user_id: int, syllabus_id: int, content: str, db: Session = Depends(get
     if not syllabus:
         raise HTTPException(status_code=404, detail="Syllabus not found")
 
-    prompt = f"Here is the syllabus:\n{syllabus.content[:1500]}\n\n{content}"
+    # Преобразуем syllabus.content из JSON-строки в словарь
+    try:
+        syllabus_dict = json.loads(syllabus.content)
+    except json.JSONDecodeError:
+        syllabus_dict = {}
+
+    # Попробуем распознать "Week X" в сообщении пользователя
+    # Попробуем распознать "Week X" в сообщении пользователя
+    match = re.search(r"Week\s*(\d+)", content, re.IGNORECASE)
+    week_num = None
+    topic = None
+
+    if match:
+        week_num = int(match.group(1))
+        topic = syllabus_dict.get(str(week_num)) or syllabus_dict.get(week_num)
+        if topic:
+            content += f"\n(The topic for Week {week_num} is: {topic})"
+
+    # Формируем prompt
+    if week_num and topic:
+        prompt = (
+            f"You are a Python tutor.\n"
+            f"The student is asking for help with the topic from Week {week_num}, which is: '{topic}'.\n"
+            f"Provide two tasks based on this topic '{topic}'.\n\n"
+            f"Student's message:\n{content}"
+        )
+    else:
+        prompt = (
+            f"You are a Python tutor.\n"
+            f"The student is asking for help, but no clear week or topic was identified.\n"
+            f"Try to interpret and respond helpfully anyway.\n\n"
+            f"Student's message:\n{content}"
+        )
 
     headers = {
         'Authorization': f'Bearer {API_KEY}',
@@ -133,10 +169,14 @@ def chat(user_id: int, syllabus_id: int, content: str, db: Session = Depends(get
     response = requests.post(API_URL, json=data, headers=headers)
 
     if response.status_code == 200:
-        result = response.json()
-        bot_reply = result['choices'][0]['message']['content']
+        try:
+            result = response.json()
+            bot_reply = result['choices'][0]['message']['content']
+        except Exception as e:
+            print("❌ Failed to parse JSON:", e)
+            bot_reply = "⚠ Failed to parse AI response."
     else:
-        bot_reply = f"Failed to fetch data from API. Status Code: {response.status_code}"
+        bot_reply = f"⚠ AI error. Status Code: {response.status_code}"
 
     msg_bot = Message(sender="bot", content=bot_reply, user_id=user_id, syllabus_id=syllabus_id)
     db.add(msg_bot)
@@ -155,7 +195,6 @@ def chat(user_id: int, syllabus_id: int, content: str, db: Session = Depends(get
         ]
     }
 
-
 @app.delete("/user/{user_id}")
 def delete_user(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
@@ -173,11 +212,9 @@ def delete_user(user_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "User and related data deleted"}
 
-
 @app.get("/topics")
 def get_topics(db: Session = Depends(get_db)):
     return db.query(Topic).all()
-
 
 class TopicCreate(BaseModel):
     title: str
@@ -191,11 +228,9 @@ def create_topic(topic: TopicCreate, db: Session = Depends(get_db)):
     db.refresh(new_topic)
     return new_topic
 
-
 @app.get("/tasks")
 def get_tasks(db: Session = Depends(get_db)):
     return db.query(Task).all()
-
 
 class TaskCreate(BaseModel):
     title: str
@@ -209,7 +244,6 @@ def create_task(task: TaskCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_task)
     return new_task
-
 
 @app.delete("/syllabus")
 def delete_syllabus(user_id: int, db: Session = Depends(get_db)):
