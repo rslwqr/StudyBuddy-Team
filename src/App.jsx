@@ -4,7 +4,7 @@ import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import SyllabusPage from './pages/SyllabusPage'
 import ProfilePage from './pages/ProfilePage'
-import ChatPage from './pages/ChatPage' // ✅ добавили
+import ChatPage from './pages/ChatPage'
 
 import './App.css'
 
@@ -43,7 +43,7 @@ export default function App() {
                 />
                 <Route path="/syllabus" element={<SyllabusPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/chat" element={<ChatPage />} /> {/* ✅ новый маршрут */}
+                <Route path="/chat" element={<ChatPage />} /> {}
             </Routes>
         </BrowserRouter>
     )

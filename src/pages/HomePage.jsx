@@ -23,7 +23,10 @@ export default function HomePage({ onRegisterClick }) {
     return (
         <div className="page">
             <header className="top-bar">
-                <img src={logo} alt="StudyBuddy Logo" className="logo" />
+                <Link to="/">
+                    <img src={logo} alt="StudyBuddy Logo" className="logo" />
+                </Link>
+
                 <div className="top-bar-right">
                     {!isLoggedIn ? (
                         <button className="register-link" onClick={onRegisterClick}>
