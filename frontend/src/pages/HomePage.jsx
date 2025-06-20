@@ -1,14 +1,43 @@
-// src/pages/HomePage.jsx
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import './HomePage.css'
 import logo from '../assets/logo.svg'
 import robot from '../assets/robot.png'
 
-export default function HomePage({ onGetStarted }) {
+export default function HomePage({ onRegisterClick }) {
+    const navigate = useNavigate()
+    const isLoggedIn = localStorage.getItem('user_id')
+    const syllabusUploaded = localStorage.getItem('syllabus_uploaded') // ✅ проверка на силабус
+
+    const handleChatAccess = () => {
+        if (!isLoggedIn) {
+            alert('Please register or log in to access the chat.')
+            return
+        }
+        if (!syllabusUploaded) {
+            alert('Please upload your syllabus before using the chat.')
+            return
+        }
+        navigate('/chat')
+    }
+
     return (
         <div className="page">
             <header className="top-bar">
-                <img src={logo} alt="StudyBuddy Logo" className="logo" />
+                <Link to="/">
+                    <img src={logo} alt="StudyBuddy Logo" className="logo" />
+                </Link>
+
+                <div className="top-bar-right">
+                    {!isLoggedIn ? (
+                        <button className="register-link" onClick={onRegisterClick}>
+                            Register
+                        </button>
+                    ) : (
+                        <Link to="/profile">
+                            <img src="/profile-icon.png" alt="Profile" className="profile-icon" />
+                        </Link>
+                    )}
+                </div>
             </header>
 
             <main className="main-content">
@@ -20,11 +49,11 @@ export default function HomePage({ onGetStarted }) {
                     </p>
 
                     <div className="button-group">
-                        <button className="start" onClick={onGetStarted}>
+                        <button className="start" onClick={handleChatAccess}>
                             Get Started
                         </button>
                         <Link to="/syllabus">
-                            <button className="outline">See Syllabus</button>
+                            <button className="outline">Syllabus</button>
                         </Link>
                     </div>
                 </div>

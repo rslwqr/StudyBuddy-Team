@@ -1,9 +1,11 @@
-// src/App.jsx
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import RegisterPage from './pages/RegisterPage'
 import SyllabusPage from './pages/SyllabusPage'
+import ProfilePage from './pages/ProfilePage'
+import ChatPage from './pages/ChatPage'
+
 import './App.css'
 
 export default function App() {
@@ -16,7 +18,7 @@ export default function App() {
                     path="/"
                     element={
                         <>
-                            <HomePage onGetStarted={() => setIsRegisterOpen(true)} />
+                            <HomePage onRegisterClick={() => setIsRegisterOpen(true)} />
                             {isRegisterOpen && (
                                 <div
                                     className="modal-overlay"
@@ -39,8 +41,10 @@ export default function App() {
                         </>
                     }
                 />
-                +       <Route path="/syllabus" element={<SyllabusPage />} />
+                <Route path="/syllabus" element={<SyllabusPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/chat" element={<ChatPage />} /> {}
             </Routes>
-            +   </BrowserRouter>
+        </BrowserRouter>
     )
 }

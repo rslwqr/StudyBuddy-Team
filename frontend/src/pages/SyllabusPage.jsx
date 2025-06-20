@@ -1,9 +1,8 @@
-// src/pages/SyllabusPage.jsx
 import { useEffect, useState, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import './SyllabusPage.css'
 import logo from '../assets/logo.svg'
-import profileIcon from '../assets/profile_icon.svg'
+
 
 export default function SyllabusPage() {
     const [pdfUrl, setPdfUrl] = useState(null)
@@ -12,26 +11,19 @@ export default function SyllabusPage() {
     const navigate = useNavigate()
     const userId = localStorage.getItem('user_id')
 
-    // check registration
-    useEffect(() => {
-        if (!userId) {
-            alert('Please register first.')
-            navigate('/')
-        }
-    }, [userId, navigate])
-
-
     useEffect(() => {
         const fetchSyllabus = async () => {
             try {
                 const res = await fetch(`http://127.0.0.1:8000/download_syllabus?user_id=${userId}`)
                 if (!res.ok) {
                     setStatus('No syllabus uploaded yet.')
+                    localStorage.removeItem('syllabus_uploaded')
                     return
                 }
                 const blob = await res.blob()
                 setPdfUrl(URL.createObjectURL(blob))
                 setStatus('')
+                localStorage.setItem('syllabus_uploaded', 'true')
             } catch {
                 setStatus('Failed to load syllabus')
             }
@@ -57,9 +49,14 @@ export default function SyllabusPage() {
 
             if (!res.ok) throw new Error()
 
+            const data = await res.json()
+            const syllabusId = data.syllabus_id
+            localStorage.setItem('syllabus_id', syllabusId)
+
             const blob = new Blob([file], { type: 'application/pdf' })
             setPdfUrl(URL.createObjectURL(blob))
             setStatus('Syllabus uploaded successfully')
+            localStorage.setItem('syllabus_uploaded', 'true')
         } catch {
             setStatus('Upload failed')
         }
@@ -79,18 +76,24 @@ export default function SyllabusPage() {
     }
 
     const handleLogout = () => {
-        localStorage.removeItem('user_id')
+        localStorage.clear()
         navigate('/')
     }
 
     return (
         <div className="page syllabus-page">
             <header className="top-bar">
-                <img src={logo} alt="StudyBuddy Logo" className="logo" />
+                <Link to="/">
+                    <img src={logo} alt="StudyBuddy Logo" className="logo" />
+                </Link>
+
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <img src={profileIcon} alt="Profile" className="avatar" />
-                    <button onClick={handleLogout} className="logout-button">Logout</button>
+                    <Link to="/profile">
+                        <img src="/profile-icon.png" alt="Profile" className="avatar" style={{ cursor: 'pointer' }} />
+                    </Link>
+                    <button onClick={handleLogout} className="logout-button">Log out</button>
                 </div>
+
             </header>
 
             <h1 className="syllabus-title">Syllabus</h1>
@@ -119,8 +122,9 @@ export default function SyllabusPage() {
                 )}
             </div>
 
-            <div className="back-link">
-                <Link to="/">← Back to Home</Link>
+            <div className="bottom-links" style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem' }}>
+                <Link to="/" style={{ color: 'green', textDecoration: 'none' }}>← Back to Home</Link>
+                <Link to="/chat" style={{ color: 'green', textDecoration: 'none' }}>→ Go to the Chat</Link>
             </div>
         </div>
     )

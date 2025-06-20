@@ -14,6 +14,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    margin-left: -2rem;
 }
 
 .logo {
@@ -153,4 +154,71 @@ button:focus-visible,
     background-color: #E3F1E8;
 }
 
+.top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+}
 
+.top-bar-right {
+    display: flex;
+    align-items: center;
+}
+
+.register-link {
+    background-color: transparent;
+    color: #3e8654;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    margin-top: -10px;
+}
+
+.register-link:hover {
+    background-color: #2d7a52;
+    color: white;
+}
+
+
+.profile-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+
+.modal-content {
+    background: #fdf7ee;
+    padding: 2rem;
+    border-radius: 1rem;
+    min-width: 320px;
+    position: relative;
+}
+
+.modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
