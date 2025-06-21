@@ -28,7 +28,7 @@
     justify-content: space-between;
     gap: 2rem;
 
-    margin-top: 5rem; /* ✅ Добавь это */
+    margin-top: 1rem;
 }
 
 
@@ -66,7 +66,7 @@ p {
 .button-group {
     display: flex;
     gap: 2rem;
-    margin-top: 7rem; /* ⬅️ увеличь отступ, чтобы кнопки опустились */
+    margin-top: 3rem;
 }
 
 
@@ -85,29 +85,34 @@ button {
     -webkit-tap-highlight-color: transparent; /* убираем голубой тап-хайлайт на мобильных */
 }
 
-.start,
-.outline {
-    width: 180px;
-    height: 50px;
+.start, .outline {
+    width: 140px;
+    height: 40px;
+    border: none;
     border-radius: 35px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    text-decoration: none;
+    font-size: 16px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
 .start {
     background-color: #2E7A53;
-    color: #FFFFFF;
+    color: white;
+}
+
+.start:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
 }
 
 .outline {
     background-color: transparent;
-    border: 2px solid #2E7A53;
     color: #2E7A53;
+    border: 2px solid #2E7A53;
 }
 
-.start:hover,
 .outline:hover {
     transform: translateY(-2px);
     opacity: 0.9;
@@ -221,4 +226,79 @@ button:focus-visible,
     border: none;
     font-size: 1.5rem;
     cursor: pointer;
+}
+
+.btn {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    border-radius: 999px;
+    padding: 0.5rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 1rem;
+    border: 2px solid #5D916D;
+}
+
+.login-btn,
+.signup-btn {
+    width: 120px;
+    height: 40px;
+    border-radius: 999px;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+    margin-left: 1rem;
+}
+
+
+.login-btn {
+    background-color: transparent;
+    color: #5D916D;
+    border: 2px solid #5D916D;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.signup-btn {
+    background-color: #5D916D;
+    color: white;
+    border: none;
+}
+
+.signup-btn:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+button:focus,
+button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.login-btn,
+.signup-btn,
+.start,
+.outline {
+    transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.login-btn:hover,
+.signup-btn:hover,
+.start:hover,
+.outline:hover {
+    transform: translateY(-2px);
+    opacity: 0.9;
+}
+
+.outline {
+    background-color: transparent; /* заменили белый фон */
 }

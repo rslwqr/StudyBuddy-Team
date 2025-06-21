@@ -1,110 +1,150 @@
-.syllabus-page {
-    background-color: #F9F7F0;
-    min-height: 100vh;
-    padding: 2rem 4rem;
-    font-family: 'Instrument Sans', sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 .top-bar {
-    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 16px 32px;
+    background-color: #F9F7F0;
+}
+
+.left-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
 .logo {
     height: 48px;
 }
 
-.avatar {
-    width: 60px;
-    height: auto;
-    border-radius: 50%;
-    padding: 0.25rem;
+.header-center-title {
+    font-size: 32px;
+    font-weight: bold;
+    font-family: 'Instrument Sans', sans-serif;
+    color: black;
 }
 
-.syllabus-title {
-    font-family: 'Montserrat', sans-serif;
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 2rem 0 1rem;
+.right-header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.icon-btn {
+    width: 38px;
+    height: 38px;
+    cursor: pointer;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.icon-btn:hover {
+    opacity: 0.7;
 }
 
 .pdf-controls {
     display: flex;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.upload,
-.remove {
-    padding: 0.6rem 1.5rem;
-    font-size: 1rem;
-    border-radius: 30px;
-    border: none;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    font-family: 'Instrument Sans', sans-serif;
-}
-
-.upload {
-    background-color: #2E7A53;
-    color: white;
-}
-
-.upload:hover {
-    background-color: #256b48;
-}
-
-.remove {
-    background-color: #e36c6c;
-    color: white;
-}
-
-.remove:hover {
-    background-color: #c95454;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 8px; /* было, например, 48px — сделай меньше */
+    margin-bottom: 16px;
 }
 
 .pdf-container {
-    background: white;
-    width: 100%;
-    max-width: 860px;
-    height: 600px;
-    border-radius: 16px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
-    overflow: hidden;
+    margin-top: 8px; /* стало меньше */
+    display: flex;
+    justify-content: center;
 }
+
+.pdf-viewer {
+    width: 700px;
+    height: 1200px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.upload {
+    background-color: #2E7A53; /* зелёный */
+    color: white;
+    width: 110px;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+.upload:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.remove {
+    width: 110px;
+    background-color: #d9534f; /* красный */
+    color: white;
+    border: none;
+    border-radius: 30px;
+    padding: 10px 24px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+
+.remove:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.pdf-container {
+    margin-top: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.pdf-placeholder {
+    width: 600px;
+    height: 750px;
+    background-color: white;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 18px;
+    text-align: center;
+    padding: 24px;
+}
+
+
 
 .status {
-    padding: 1rem;
-    color: #867373;
+    font-size: 16px;
+    color: #445450;
+    text-align: center;
 }
 
-.back-link {
-    margin-top: 2rem;
+.syllabus-nav-links {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-top: 24px;
 }
 
-.back-link a {
+.nav-link {
+    font-size: 16px;
     color: #2E7A53;
-    text-decoration: none;
     font-weight: 500;
-}
-
-.logout-button {
-    background: none;
-    color: #666666;
-    border: none;
-    padding: 0.5rem 1rem;
-    font-size: 1rem;
     cursor: pointer;
-    font-family: 'Instrument Sans', sans-serif;
-    transform: translateY(-8px);
+    transition: opacity 0.2s ease-in-out;
 }
 
-.logout-button:hover {
-    color: #444;
+.nav-link:hover {
+    opacity: 0.7;
 }
-

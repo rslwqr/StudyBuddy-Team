@@ -2,11 +2,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import './HomePage.css'
 import logo from '../assets/logo.svg'
 import robot from '../assets/robot.png'
+import profileIcon from '../assets/profile_icon.svg' // добавь в папку assets
 
-export default function HomePage({ onRegisterClick }) {
+
+export default function HomePage({ onLoginClick, onRegisterClick }) {
     const navigate = useNavigate()
     const isLoggedIn = localStorage.getItem('user_id')
-    const syllabusUploaded = localStorage.getItem('syllabus_uploaded') // ✅ проверка на силабус
+    const syllabusUploaded = localStorage.getItem('syllabus_uploaded')
 
     const handleChatAccess = () => {
         if (!isLoggedIn) {
@@ -29,13 +31,17 @@ export default function HomePage({ onRegisterClick }) {
 
                 <div className="top-bar-right">
                     {!isLoggedIn ? (
-                        <button className="register-link" onClick={onRegisterClick}>
-                            Register
-                        </button>
+                        <>
+                            <button className="btn login-btn" onClick={onLoginClick}>
+                                Log In
+                            </button>
+                            <button className="btn signup-btn" onClick={onRegisterClick}>
+                                Sign Up
+                            </button>
+                        </>
                     ) : (
                         <Link to="/profile">
-                            <img src="/profile-icon.png" alt="Profile" className="profile-icon" />
-                        </Link>
+                            <img src={profileIcon} alt="Profile" className="profile-icon" />                        </Link>
                     )}
                 </div>
             </header>
@@ -52,11 +58,21 @@ export default function HomePage({ onRegisterClick }) {
                         <button className="start" onClick={handleChatAccess}>
                             Get Started
                         </button>
-                        <Link to="/syllabus">
-                            <button className="outline">Syllabus</button>
-                        </Link>
+                        {isLoggedIn ? (
+                            <Link to="/syllabus">
+                                <button className="outline">Syllabus</button>
+                            </Link>
+                        ) : (
+                            <button
+                                className="outline"
+                                onClick={() => alert('Please register or log in to access your syllabus.')}
+                            >
+                                Syllabus
+                            </button>
+                        )}
                     </div>
                 </div>
+
                 <img src={robot} alt="StudyBuddy Robot" className="robot-img" />
             </main>
         </div>

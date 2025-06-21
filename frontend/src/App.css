@@ -33,3 +33,12 @@
   cursor: pointer;
   color: #2E7A53;
 }
+
+.btn-animate {
+  transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
+}
+
+.btn-animate:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}

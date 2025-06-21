@@ -1,8 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import './SyllabusPage.css'
 import logo from '../assets/logo.svg'
-
+import chatIcon from '../assets/chat_icon.svg' // добавь в папку assets
+import profileIcon from '../assets/profile_icon.svg' // добавь в папку assets
 
 export default function SyllabusPage() {
     const [pdfUrl, setPdfUrl] = useState(null)
@@ -38,6 +39,9 @@ export default function SyllabusPage() {
         const file = e.target.files[0]
         if (!file) return
 
+        // 👇 Сброс input — даже если выбирается тот же файл
+        e.target.value = null
+
         const form = new FormData()
         form.append('file', file)
 
@@ -68,43 +72,56 @@ export default function SyllabusPage() {
                 method: 'DELETE',
             })
             if (!res.ok) throw new Error()
+
             setPdfUrl(null)
             setStatus('Syllabus removed')
+            localStorage.removeItem('syllabus_uploaded')
+
+            // 👇 Сброс input вручную
+            if (fileInputRef.current) {
+                fileInputRef.current.value = null
+            }
         } catch {
             setStatus('Failed to remove syllabus')
         }
     }
 
-    const handleLogout = () => {
-        localStorage.clear()
-        navigate('/')
-    }
-
     return (
         <div className="page syllabus-page">
             <header className="top-bar">
-                <Link to="/">
+                <div className="left-header" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
                     <img src={logo} alt="StudyBuddy Logo" className="logo" />
-                </Link>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <Link to="/profile">
-                        <img src="/profile-icon.png" alt="Profile" className="avatar" style={{ cursor: 'pointer' }} />
-                    </Link>
-                    <button onClick={handleLogout} className="logout-button">Log out</button>
                 </div>
 
-            </header>
+                <h1 className="header-center-title">Syllabus</h1>
 
-            <h1 className="syllabus-title">Syllabus</h1>
+                <div className="right-header">
+                    <img
+                        src={chatIcon}
+                        alt="Chat"
+                        className="icon-btn"
+                        onClick={() => navigate('/chat')}
+                    />
+                    <img
+                        src={profileIcon}
+                        alt="Profile"
+                        className="icon-btn"
+                        onClick={() => navigate('/profile')}
+                    />
+                </div>
+            </header>
 
             <div className="pdf-controls">
                 <button className="upload" onClick={() => fileInputRef.current.click()}>
                     Upload
                 </button>
-                <button className="remove" onClick={handleRemove}>
-                    Remove
-                </button>
+
+                {pdfUrl && (
+                    <button className="remove" onClick={handleRemove}>
+                        Remove
+                    </button>
+                )}
+
                 <input
                     type="file"
                     accept="application/pdf"
@@ -116,15 +133,18 @@ export default function SyllabusPage() {
 
             <div className="pdf-container">
                 {pdfUrl ? (
-                    <embed src={pdfUrl} type="application/pdf" width="100%" height="100%" />
+                    <embed src={pdfUrl} type="application/pdf" className="pdf-viewer" />
                 ) : (
-                    <p className="status">{status}</p>
+                    <div className="pdf-placeholder">
+                        Your syllabus will appear here after upload.
+                    </div>
                 )}
             </div>
 
-            <div className="bottom-links" style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem' }}>
-                <Link to="/" style={{ color: 'green', textDecoration: 'none' }}>← Back to Home</Link>
-                <Link to="/chat" style={{ color: 'green', textDecoration: 'none' }}>→ Go to the Chat</Link>
+            {/* 👇 Вот этот блок добавлен */}
+            <div className="syllabus-nav-links">
+                <span className="nav-link" onClick={() => navigate('/')}>← Back to Home</span>
+                <span className="nav-link" onClick={() => navigate('/chat')}>Go to Chat →</span>
             </div>
         </div>
     )

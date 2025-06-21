@@ -1,15 +1,17 @@
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
-import RegisterPage from './pages/RegisterPage'
 import SyllabusPage from './pages/SyllabusPage'
 import ProfilePage from './pages/ProfilePage'
 import ChatPage from './pages/ChatPage'
+import SignupPage from './pages/SignupPage'
+import LoginPage from './pages/LoginPage'
 
 import './App.css'
 
 export default function App() {
-    const [isRegisterOpen, setIsRegisterOpen] = useState(false)
+    const [showSignup, setShowSignup] = useState(false)
+    const [showLogin, setShowLogin] = useState(false)
 
     return (
         <BrowserRouter>
@@ -17,34 +19,34 @@ export default function App() {
                 <Route
                     path="/"
                     element={
-                        <>
-                            <HomePage onRegisterClick={() => setIsRegisterOpen(true)} />
-                            {isRegisterOpen && (
-                                <div
-                                    className="modal-overlay"
-                                    onClick={() => setIsRegisterOpen(false)}
-                                >
-                                    <div
-                                        className="modal-content"
-                                        onClick={e => e.stopPropagation()}
-                                    >
-                                        <button
-                                            className="modal-close"
-                                            onClick={() => setIsRegisterOpen(false)}
-                                        >
-                                            ×
-                                        </button>
-                                        <RegisterPage />
-                                    </div>
-                                </div>
-                            )}
-                        </>
+                        <HomePage
+                            onRegisterClick={() => setShowSignup(true)}
+                            onLoginClick={() => setShowLogin(true)}
+                        />
                     }
                 />
                 <Route path="/syllabus" element={<SyllabusPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/chat" element={<ChatPage />} /> {}
+                <Route path="/chat" element={<ChatPage />} />
             </Routes>
+
+            {/* ✅ Signup modal */}
+            {showSignup && (
+                <div className="modal-overlay" onClick={() => setShowSignup(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <SignupPage onClose={() => setShowSignup(false)} />
+                    </div>
+                </div>
+            )}
+
+            {/* ✅ Login modal */}
+            {showLogin && (
+                <div className="modal-overlay" onClick={() => setShowLogin(false)}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <LoginPage onClose={() => setShowLogin(false)} />
+                    </div>
+                </div>
+            )}
         </BrowserRouter>
     )
 }
