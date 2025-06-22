@@ -7,6 +7,7 @@
     justify-content: space-between;
 }
 
+/* === Header === */
 .chat-header {
     background-color: #2d7a52;
     color: white;
@@ -20,7 +21,6 @@
 .chat-title {
     position: absolute;
     left: 50%;
-    color: white;
     transform: translateX(-50%);
     font-size: 1.4rem;
     font-weight: 600;
@@ -34,84 +34,80 @@
     cursor: pointer;
 }
 
-
-
 .chat-profile-icon {
-    width: 36px;
-    height: 36px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
+    padding: 4px;
     cursor: pointer;
+    object-fit: cover;
 }
 
-
-.chat-message.user {
-    align-self: flex-end;
-    background-color: #fff;
-    border: 2px solid #8B8585;
-    font-size: 16px;
-    line-height: 1.4;
-    padding: 0.75rem 1.2rem;
-    max-width: 70%;
-    word-wrap: break-word;
-
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
-    border-bottom-left-radius: 30px;
-    border-bottom-right-radius: 0px;
-}
-
-.chat-message.bot {
-    align-self: flex-end;
-    background-color: #fff;
-    border: 2px solid #8B8585;
-    font-size: 16px;
-    line-height: 1.4;
-    padding: 0.75rem 1.2rem;
-    max-width: 70%;
-    word-wrap: break-word;
-
-    border-top-left-radius: 30px;
-    border-top-right-radius: 30px;
-    border-bottom-left-radius: 0px;
-    border-bottom-right-radius: 30px;
-}
-
+/* === Messages container === */
 .chat-messages {
     flex: 1;
     padding: 1rem 2rem;
     overflow-y: auto;
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
     gap: 1rem;
+    box-shadow: inset 0 8px 8px -8px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 
-.chat-message.bot {
-    align-self: flex-start;
-    background-color: white;
-    border-radius: 1rem 1rem 1rem 0;
+.chat-messages::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 30px;
+    pointer-events: none;
+    background: linear-gradient(to bottom, rgba(249, 247, 240, 1), rgba(249, 247, 240, 0));
+    filter: blur(8px);
+    z-index: 10;
 }
 
-
+/* === Message bubbles === */
 .chat-message {
     padding: 0.75rem 1.2rem;
     border-radius: 1rem;
-    max-width: 70%;
+    max-width: 80%;
     word-wrap: break-word;
     background-color: white;
-    border: 1px solid black;
+    border: 2px solid #8B8585;
     font-size: 16px;
     line-height: 1.4;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    animation: fadeIn 0.3s ease forwards;
 }
 
 .chat-message.user {
     align-self: flex-end;
+    border-top-right-radius: 30px;
+    border-bottom-right-radius: 0;
+    padding-right: 1.5rem;
 }
 
 .chat-message.bot {
     align-self: flex-start;
+    border-top-left-radius: 30px;
+    border-bottom-left-radius: 0;
+    padding-left: 1.5rem;
 }
+
+/* === Markdown заголовки в сообщениях бота === */
+.markdown-heading {
+    font-weight: 600;
+    margin: 0.4rem 0;
+}
+
+.markdown-h1 { font-size: 20px; }
+.markdown-h2 { font-size: 18px; }
+.markdown-h3 { font-size: 16px; }
+.markdown-h4 { font-size: 15px; }
+.markdown-h5 { font-size: 14px; }
+.markdown-h6 { font-size: 13px; }
 
 /* === Welcome screen === */
 .chat-welcome {
@@ -137,7 +133,6 @@
     margin: 0;
 }
 
-/* === Input === */
 .chat-input-wrapper {
     position: relative;
     display: flex;
@@ -148,22 +143,26 @@
     width: 100%;
 }
 
-.chat-input-wrapper input {
-    width: 80%;
-    padding: 0.5rem 3.5rem 0.75rem 1rem;
+.chat-input-wrapper textarea {
+    width: 100%;
+    padding: 0.5rem 3.5rem 0.75rem 1rem; /* справа место под кнопку */
     font-size: 1rem;
     border: 2px solid #445450;
     border-radius: 2rem;
     outline: none;
     background-color: #fff;
     font-family: 'Instrument Sans', sans-serif;
+    resize: none;
+    overflow: hidden;
+    box-sizing: border-box;
+    line-height: 1.4;
 }
 
-/* === Send button (arrow) === */
 .input-send-button {
     position: absolute;
-    right: 5.8%;
-    top: -28%;
+    right: 6px; /* фиксированное расстояние от края */
+    top: 50%;
+    transform: translateY(-95%);
     background: #fff;
     border: 2px solid #445450;
     border-radius: 50%;
@@ -182,15 +181,21 @@
     stroke: #445450;
 }
 
-
-.chat-profile-icon {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background-color: white;
-    padding: 4px;
-    box-shadow: 0 0 0 2px #F6B274; /* опционально: добавляет оранжевую рамку */
-    cursor: pointer;
-    object-fit: cover;
+/* === Loading placeholder === */
+.loading-placeholder {
+    font-style: italic;
+    color: #5D916D;
+    opacity: 0.7;
 }
 
+/* Анимация появления */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
