@@ -30,12 +30,51 @@ export default function ChatPage() {
         }
     };
 
-    // Скроллим вручную только после полной посимвольной печати
+    const submitSolution = async (code) => {
+        try {
+            const res = await fetch('http://localhost:8000/tasks');
+            const tasks = await res.json();
+            const recentTasks = tasks.slice(-2); // проверка по последним двум задачам
+
+            for (let task of recentTasks) {
+                const solutionPayload = {
+                    user_id,
+                    task_id: task.id,
+                    code: code
+                };
+
+                const res = await fetch('http://localhost:8000/submit_solution', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(solutionPayload),
+                });
+
+                const data = await res.json();
+                if (data.is_correct) {
+                    setMessages(prev => [...prev, { sender: 'bot', text: data.evaluation }]);
+                    return;
+                }
+            }
+
+            setMessages(prev => [...prev, { sender: 'bot', text: "❌ Your code didn't match any known task." }]);
+        } catch (error) {
+            console.error("🚨 Error submitting solution:", error);
+            setMessages(prev => [...prev, { sender: 'bot', text: "⚠ Error while checking the solution." }]);
+        }
+    };
+
+
     const scrollToBottom = () => {
         if (messagesEndRef.current) {
             messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
         }
     };
+    const isLikelyCode = (text) => {
+        return /def\s+\w+|print\(|for\s+\w+\s+in|while\s+|class\s+/.test(text);
+    };
+
 
     const handleSend = async () => {
         if (!input.trim()) return;
@@ -50,7 +89,6 @@ export default function ChatPage() {
         try {
             const payload = { user_id, syllabus_id, content: input };
 
-            // Добавляем placeholder "loading"
             setMessages(prev => [...prev, { sender: 'bot', text: 'loading' }]);
 
             const res = await fetch('http://localhost:8000/chat', {
@@ -80,8 +118,14 @@ export default function ChatPage() {
                 });
             }
 
-            // Скроллим вниз один раз, когда сообщение полностью отображено
             scrollToBottom();
+            if (isLikelyCode(input)) {
+                await submitSolution(input);
+                return;
+            }
+
+
+
 
         } catch (err) {
             console.error('❌ Error in /chat:', err);
