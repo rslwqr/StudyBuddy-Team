@@ -22,7 +22,7 @@ export default function SignupPage({ onClose }) {
         }
 
         try {
-            const res = await fetch('studybuddy-team-production.up.railway.app', {
+            const res = await fetch('studybuddy-team-production.up.railway.app/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email })
