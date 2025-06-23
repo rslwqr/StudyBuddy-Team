@@ -32,7 +32,7 @@ export default function ChatPage() {
 
     const submitSolution = async (code) => {
         try {
-            const res = await fetch('studybuddy-team-production.up.railway.app');
+            const res = await fetch('studybuddy-team-production.up.railway.app/tasks');
             const tasks = await res.json();
             const recentTasks = tasks.slice(-2); // проверка по последним двум задачам
 
@@ -43,7 +43,7 @@ export default function ChatPage() {
                     code: code
                 };
 
-                const res = await fetch('studybuddy-team-production.up.railway.app', {
+                const res = await fetch('studybuddy-team-production.up.railway.app/submit_solution', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -91,7 +91,7 @@ export default function ChatPage() {
 
             setMessages(prev => [...prev, { sender: 'bot', text: 'loading' }]);
 
-            const res = await fetch('studybuddy-team-production.up.railway.app', {
+            const res = await fetch('studybuddy-team-production.up.railway.app/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),
