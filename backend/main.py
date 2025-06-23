@@ -31,7 +31,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[https://ornate-quokka-a43c11.netlify.app
+    allow_origins=["https://ornate-quokka-a43c11.netlify.app"
     ],
     allow_credentials=True,
     allow_methods=["*"],
