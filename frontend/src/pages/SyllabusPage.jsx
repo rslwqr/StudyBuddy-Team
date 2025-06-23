@@ -15,7 +15,7 @@ export default function SyllabusPage() {
     useEffect(() => {
         const fetchSyllabus = async () => {
             try {
-                const res = await fetch(`studybuddy-team-production.up.railway.app/download_syllabus?user_id=${userId}`)
+                const res = await fetch(`https://studybuddy-team-production.up.railway.app/download_syllabus?user_id=${userId}`)
                 if (!res.ok) {
                     setStatus('No syllabus uploaded yet.')
                     localStorage.removeItem('syllabus_uploaded')
@@ -46,7 +46,7 @@ export default function SyllabusPage() {
         form.append('file', file)
 
         try {
-            const res = await fetch(`studybuddy-team-production.up.railway.app/upload_syllabus?user_id=${userId}`, {
+            const res = await fetch(`https://studybuddy-team-production.up.railway.app/upload_syllabus?user_id=${userId}`, {
                 method: 'POST',
                 body: form,
             })
@@ -68,7 +68,7 @@ export default function SyllabusPage() {
 
     const handleRemove = async () => {
         try {
-            const res = await fetch(`studybuddy-team-production.up.railway.app/syllabus?user_id=${userId}`, {
+            const res = await fetch(`https://studybuddy-team-production.up.railway.app/syllabus?user_id=${userId}`, {
                 method: 'DELETE',
             })
             if (!res.ok) throw new Error()
