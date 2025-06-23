@@ -25,7 +25,7 @@ function RegisterPage() {
         }
 
         try {
-            const res = await fetch('studybuddy-team-production.up.railway.app/register', {
+            const res = await fetch('https://studybuddy-team-production.up.railway.app/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email }),
