@@ -13,7 +13,7 @@ export default function LoginPage({ onClose }) {
         }
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/login', {
+            const res = await fetch('studybuddy-team-production.up.railway.app', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
