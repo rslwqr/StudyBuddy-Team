@@ -26,7 +26,7 @@ load_dotenv()
 API_KEY = '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'
 API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
-DATABASE_URL = "sqlite:///./studybuddy.db"
+DATABASE_URL = "sqlite:///./studybuddy1.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
