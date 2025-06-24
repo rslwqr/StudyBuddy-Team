@@ -17,6 +17,10 @@ from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
 from models import Solution, Task
 import os
+import random
+from models import EmailCode
+from datetime import datetime, timedelta
+from pydantic import constr
 
 load_dotenv()
 API_KEY = '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'
@@ -48,6 +52,7 @@ def get_db():
 class RegisterRequest(BaseModel):
     name: str
     email: EmailStr
+    password: str
 
     @validator("email")
     def check_domain(cls, v):
@@ -56,19 +61,15 @@ class RegisterRequest(BaseModel):
         return v
 
 class LoginRequest(BaseModel):
-    name: str
     email: EmailStr
+    password: str
 
 
-@app.post("/login")
-def login_user(data: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(
-        User.email == data.email,
-        User.name == data.name
-    ).first()
-
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found. Please check your name and email.")
+@app.post("/login_with_password")
+def login_with_password(data: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == data.email).first()
+    if not user or user.password != data.password:
+        raise HTTPException(401, "Invalid email or password")
 
     return {"user_id": user.id, "message": f"Welcome back, {user.name}!"}
 
@@ -79,7 +80,7 @@ def register_user(data: RegisterRequest, db: Session = Depends(get_db)):
     existing = db.query(User).filter(User.email == data.email).first()
     if existing:
         raise HTTPException(status_code=409, detail="User with this email already exists")
-    user = User(name=data.name, email=data.email)
+    user = User(name=data.name, email=data.email, password=data.password)
     db.add(user)
     try:
         db.commit()
@@ -126,8 +127,6 @@ class SolutionRequest(BaseModel):
 @app.post("/submit_solution")
 def submit_solution(data: SolutionRequest, db: Session = Depends(get_db)):
     user_code = data.code
-
-    # Берем 2 последние задачи, с которыми, вероятно, связан код
     tasks = db.query(Task).order_by(Task.id.desc()).limit(2).all()
 
     matched = False
@@ -311,8 +310,6 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
     except Exception as e:
         print("❌ AI error:", e)
         bot_reply = "⚠ Sorry, the AI could not respond at this time."
-
-    # Сохраняем ответ бота
     msg_bot = Message(sender="bot", content=bot_reply, user_id=user_id, syllabus_id=syllabus_id)
     db.add(msg_bot)
     db.commit()
@@ -390,7 +387,44 @@ def delete_syllabus(user_id: int, db: Session = Depends(get_db)):
     db.commit()
     return {"message": "Syllabus deleted"}
 
-@app.get("/debug/users")
-def get_all_users(db: Session = Depends(get_db)):
-    return db.query(User).all()
+
+@app.post("/send_code")
+def send_code(email: EmailStr, db: Session = Depends(get_db)):
+    code = str(random.randint(100000, 999999))
+
+    existing = db.query(EmailCode).filter(EmailCode.email == email).first()
+    if existing:
+        existing.code = code
+        existing.created_at = datetime.utcnow()
+    else:
+        db.add(EmailCode(email=email, code=code))
+
+    db.commit()
+    print(f"🔐 Your verification code: {code}")
+    return {"message": "Verification code sent to your email"}
+
+class VerifyCodeRequest(BaseModel):
+    email: EmailStr
+    code: str
+    name: str
+    password: constr(min_length=6)
+
+@app.post("/verify_code_and_register")
+def verify_code(req: VerifyCodeRequest, db: Session = Depends(get_db)):
+    record = db.query(EmailCode).filter(EmailCode.email == req.email).first()
+    if not record or record.code != req.code:
+        raise HTTPException(400, "Invalid or expired code")
+
+    existing = db.query(User).filter(User.email == req.email).first()
+    if existing:
+        raise HTTPException(409, "User already exists")
+
+    user = User(name=req.name, email=req.email, password=req.password)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return {"user_id": user.id}
+
+
+
 
