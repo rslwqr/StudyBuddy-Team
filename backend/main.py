@@ -389,3 +389,8 @@ def delete_syllabus(user_id: int, db: Session = Depends(get_db)):
     db.delete(syllabus)
     db.commit()
     return {"message": "Syllabus deleted"}
+
+@app.get("/debug/users")
+def get_all_users(db: Session = Depends(get_db)):
+    return db.query(User).all()
+
