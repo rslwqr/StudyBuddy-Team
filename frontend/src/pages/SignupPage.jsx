@@ -1,10 +1,12 @@
-// ✅ SignupPage.jsx (popup версия)
 import { useState } from 'react'
 import './SignupPage.css'
 
 export default function SignupPage({ onClose }) {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+
 
     function isInnopolisEmail(value) {
         return /^[^\s@]+@innopolis\.university$/.test(value)
@@ -21,11 +23,19 @@ export default function SignupPage({ onClose }) {
             return alert('Email must end with @innopolis.university')
         }
 
+        if (password.length < 6) {
+            return alert('Password must be at least 6 characters')
+        }
+        if (password !== confirmPassword) {
+            return alert('Passwords do not match')
+        }
+
+
         try {
             const res = await fetch('https://studybuddy-team-production.up.railway.app/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email })
+                body: JSON.stringify({ name, email, password })
             })
 
             if (res.status === 409) {
@@ -73,6 +83,26 @@ export default function SignupPage({ onClose }) {
                             placeholder="user@innopolis.university"
                             pattern="^[^\s@]+@innopolis\.university$"
                         />
+                    </label>
+                    <label>
+                          Password:
+                          <input
+                            type="password"
+                            value={password}
+                            onChange={e => setPassword(e.target.value)}
+                            required
+                            placeholder="Enter password"
+                          />
+                    </label>
+                    <label>
+                          Confirm Password:
+                          <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={e => setConfirmPassword(e.target.value)}
+                            required
+                            placeholder="Confirm password"
+                          />
                     </label>
                     <button type="submit">Sign Up</button>
                 </form>
