@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 
 Base = declarative_base()
@@ -11,6 +12,8 @@ class User(Base):
     name = Column(String)
     syllabuses = relationship("Syllabus", back_populates="user")
     messages = relationship("Message", back_populates="user")
+    password: Mapped[str] = mapped_column()
+
 
 class Syllabus(Base):
     __tablename__ = "syllabuses"
@@ -60,4 +63,12 @@ class Solution(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     task_id = Column(Integer, ForeignKey("tasks.id"))
     task = relationship("Task", back_populates="solutions")
+
+class EmailCode(Base):
+    __tablename__ = "email_codes"
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    email: Mapped[str] = mapped_column(unique=True)
+    code: Mapped[str]
+    created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
 
