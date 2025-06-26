@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
 from sqlalchemy.orm import declarative_base, relationship
-from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 
 Base = declarative_base()
@@ -12,8 +11,6 @@ class User(Base):
     name = Column(String)
     syllabuses = relationship("Syllabus", back_populates="user")
     messages = relationship("Message", back_populates="user")
-    password: Mapped[str] = mapped_column()
-
 
 class Syllabus(Base):
     __tablename__ = "syllabuses"
