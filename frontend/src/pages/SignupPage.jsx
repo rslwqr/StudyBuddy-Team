@@ -32,7 +32,7 @@ export default function SignupPage({ onClose }) {
 
 
         try {
-            const res = await fetch('https://studybuddy-team-production.up.railway.app/register', {
+            const res = await fetch('http://127.0.0.1:8000/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email, password })

@@ -2,12 +2,12 @@ import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import './SyllabusPage.css'
 import logo from '../assets/logo.svg'
-import chatIcon from '../assets/chat_icon.svg' // добавь в папку assets
-import profileIcon from '../assets/profile_icon.svg' // добавь в папку assets
+import chatIcon from '../assets/chat_icon.svg'
+import profileIcon from '../assets/profile_icon.svg'
 
-export default function SyllabusPage() {
+export function SyllabusPage() {
     const [pdfUrl, setPdfUrl] = useState(null)
-    const [status, setStatus] = useState('')
+    const [, setStatus] = useState('')
     const fileInputRef = useRef()
     const navigate = useNavigate()
     const userId = localStorage.getItem('user_id')
@@ -15,7 +15,7 @@ export default function SyllabusPage() {
     useEffect(() => {
         const fetchSyllabus = async () => {
             try {
-                const res = await fetch(`https://studybuddy-team-production.up.railway.app/download_syllabus?user_id=${userId}`)
+                const res = await fetch(`http://127.0.0.1:8000/download_syllabus?user_id=${userId}`)
                 if (!res.ok) {
                     setStatus('No syllabus uploaded yet.')
                     localStorage.removeItem('syllabus_uploaded')
@@ -39,14 +39,13 @@ export default function SyllabusPage() {
         const file = e.target.files[0]
         if (!file) return
 
-        // 👇 Сброс input — даже если выбирается тот же файл
         e.target.value = null
 
         const form = new FormData()
         form.append('file', file)
 
         try {
-            const res = await fetch(`https://studybuddy-team-production.up.railway.app/upload_syllabus?user_id=${userId}`, {
+            const res = await fetch(`http://127.0.0.1:8000/upload_syllabus?user_id=${userId}`, {
                 method: 'POST',
                 body: form,
             })
@@ -57,18 +56,22 @@ export default function SyllabusPage() {
             const syllabusId = data.syllabus_id
             localStorage.setItem('syllabus_id', syllabusId)
 
-            const blob = new Blob([file], { type: 'application/pdf' })
+            const blob = new Blob([file], {type: 'application/pdf'})
             setPdfUrl(URL.createObjectURL(blob))
             setStatus('Syllabus uploaded successfully')
             localStorage.setItem('syllabus_uploaded', 'true')
-        } catch {
+
+            navigate('/chat')
+
+        } catch (error) {
+            console.error('Upload error:', error)
             setStatus('Upload failed')
         }
     }
 
     const handleRemove = async () => {
         try {
-            const res = await fetch(`https://studybuddy-team-production.up.railway.app/syllabus?user_id=${userId}`, {
+            const res = await fetch(`http://127.0.0.1:8000/syllabus?user_id=${userId}`, {
                 method: 'DELETE',
             })
             if (!res.ok) throw new Error()
@@ -76,8 +79,8 @@ export default function SyllabusPage() {
             setPdfUrl(null)
             setStatus('Syllabus removed')
             localStorage.removeItem('syllabus_uploaded')
+            localStorage.removeItem('syllabus_id')
 
-            // 👇 Сброс input вручную
             if (fileInputRef.current) {
                 fileInputRef.current.value = null
             }
@@ -89,8 +92,8 @@ export default function SyllabusPage() {
     return (
         <div className="page syllabus-page">
             <header className="top-bar">
-                <div className="left-header" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-                    <img src={logo} alt="StudyBuddy Logo" className="logo" />
+                <div className="left-header" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
+                    <img src={logo} alt="StudyBuddy Logo" className="logo"/>
                 </div>
 
                 <h1 className="header-center-title">Syllabus</h1>
@@ -126,26 +129,29 @@ export default function SyllabusPage() {
                     type="file"
                     accept="application/pdf"
                     onChange={handleUpload}
-                    style={{ display: 'none' }}
+                    style={{display: 'none'}}
                     ref={fileInputRef}
                 />
             </div>
 
             <div className="pdf-container">
                 {pdfUrl ? (
-                    <embed src={pdfUrl} type="application/pdf" className="pdf-viewer" />
+                    <embed src={pdfUrl} type="application/pdf" className="pdf-viewer"/>
                 ) : (
                     <div className="pdf-placeholder">
                         Your syllabus will appear here after upload.
                     </div>
                 )}
             </div>
-
-            {/* 👇 Вот этот блок добавлен */}
-            <div className="syllabus-nav-links">
-                <span className="nav-link" onClick={() => navigate('/')}>← Back to Home</span>
-                <span className="nav-link" onClick={() => navigate('/chat')}>Go to Chat →</span>
+            <div className="syllabus-footer-buttons">
+                <button className="syllabus-nav-button left" onClick={() => navigate('/')}>
+                    ← Back to Home
+                </button>
+                <button className="syllabus-nav-button right" onClick={() => navigate('/chat')}>
+                    Go to Chat →
+                </button>
             </div>
+
         </div>
     )
 }

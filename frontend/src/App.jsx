@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import HomePage from './pages/HomePage'
-import SyllabusPage from './pages/SyllabusPage'
+import {SyllabusPage} from './pages/SyllabusPage'
 import ProfilePage from './pages/ProfilePage'
 import ChatPage from './pages/ChatPage'
 import SignupPage from './pages/SignupPage'
@@ -30,7 +30,6 @@ export default function App() {
                 <Route path="/chat" element={<ChatPage />} />
             </Routes>
 
-            {/* ✅ Signup modal */}
             {showSignup && (
                 <div className="modal-overlay" onClick={() => setShowSignup(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -39,7 +38,7 @@ export default function App() {
                 </div>
             )}
 
-            {/* ✅ Login modal */}
+
             {showLogin && (
                 <div className="modal-overlay" onClick={() => setShowLogin(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>

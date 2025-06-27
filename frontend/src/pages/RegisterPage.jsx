@@ -1,12 +1,9 @@
-// src/pages/RegisterPage.jsx
 import { useState } from 'react'
 import './RegisterPage.css'
 
 function RegisterPage() {
     const [name, setName] = useState('')
     const [email, setEmail] = useState('')
-
-    // Проверка домена Innopolis
     function isInnopolisEmail(value) {
         return /^[^\s@]+@innopolis\.university$/.test(value)
     }
@@ -14,18 +11,16 @@ function RegisterPage() {
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        // 1) Проверяем, что name не пустое
         if (!name.trim()) {
             return alert('Please enter your name')
         }
 
-        // 2) Проверка домена
         if (!isInnopolisEmail(email)) {
             return alert('Email must end with @innopolis.university')
         }
 
         try {
-            const res = await fetch('https://studybuddy-team-production.up.railway.app/register', {
+            const res = await fetch('http://127.0.0.1:8000/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ name, email }),
@@ -33,12 +28,12 @@ function RegisterPage() {
 
             if (res.status === 409) {
                 const { detail } = await res.json()
-                return alert(detail) // “User with this email already exists”
+                return alert(detail)
             }
 
             if (res.ok) {
                 const data = await res.json()
-                localStorage.setItem('user_id', data.user_id) // 💾 сохраняем
+                localStorage.setItem('user_id', data.user_id)
                 alert('Registration successful!')
                 localStorage.setItem('user_name', name)
                 localStorage.setItem('user_email', email)

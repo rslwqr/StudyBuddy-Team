@@ -7,14 +7,14 @@
     margin: 0 auto;
 }
 
-/* подписи Name/Email */
+
 .register-form label {
     font-size: 16px;
-    font-weight: 400; /* Regular */
+    font-weight: 400;
     color: #445450;
 }
 
-/* поля ввода */
+
 .register-form input {
     width: 90%;
     padding: 12px 16px;
@@ -24,7 +24,7 @@
     font-family: inherit;
 }
 
-/* кнопка */
+
 .register-form button {
     align-self: center;
     width: 160px;

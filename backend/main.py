@@ -1,22 +1,26 @@
-from click import prompt
-from fastapi import FastAPI, UploadFile, File, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-from models import Base, User, Syllabus, Message
-from syllabus import parse_pdf
+from fastapi import FastAPI
+app = FastAPI()
+import datetime
+import json
+import os
+import random
+import re
 import requests
+from dotenv import load_dotenv
+from fastapi import UploadFile, File, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, EmailStr, validator
-from sqlalchemy.exc import IntegrityError
-from models import Topic, Task
-import json
-import re
 from pydantic import BaseModel, EmailStr
-from dotenv import load_dotenv
-from models import Solution, Task
-import os
+from pydantic import validator, constr
+from sqlalchemy import create_engine
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
+from sqlalchemy.orm import sessionmaker
+
+
+from backend.models import Base, User, Syllabus, Message, EmailCode
+from backend.models import Solution, Task
+from backend.models import Topic
 
 load_dotenv()
 API_KEY = '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'
@@ -27,11 +31,9 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ornate-quokka-a43c11.netlify.app"
+    allow_origins=["http://localhost:5173"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -97,7 +99,7 @@ def get_users(db: Session = Depends(get_db)):
 async def upload_syllabus(user_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
     contents = await file.read()
 
-    from syllabus import parse_pdf
+    from backend.syllabus import parse_pdf
     syllabus_dict = parse_pdf(contents)
     syllabus = Syllabus(filename=file.filename, content=json.dumps(syllabus_dict), user_id=user_id)
     db.add(syllabus)
@@ -127,7 +129,6 @@ class SolutionRequest(BaseModel):
 def submit_solution(data: SolutionRequest, db: Session = Depends(get_db)):
     user_code = data.code
 
-    # Берем 2 последние задачи, с которыми, вероятно, связан код
     tasks = db.query(Task).order_by(Task.id.desc()).limit(2).all()
 
     matched = False
@@ -166,7 +167,7 @@ def submit_solution(data: SolutionRequest, db: Session = Depends(get_db)):
                 break
 
         except Exception as e:
-            print("⚠️ Error checking task:", e)
+            print("Error checking task:", e)
             continue
 
     if matched_task:
@@ -189,12 +190,9 @@ def submit_solution(data: SolutionRequest, db: Session = Depends(get_db)):
         db.commit()
 
     return {
-        "evaluation": reply_text or "❌ Your solution didn't match any known tasks.",
+        "evaluation": reply_text or "Your solution didn't match any known tasks.",
         "is_correct": int(matched)
     }
-
-
-
 
 
 @app.get("/download_syllabus")
@@ -309,10 +307,10 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         db.commit()
 
     except Exception as e:
-        print("❌ AI error:", e)
+        print("AI error:", e)
         bot_reply = "⚠ Sorry, the AI could not respond at this time."
 
-    # Сохраняем ответ бота
+
     msg_bot = Message(sender="bot", content=bot_reply, user_id=user_id, syllabus_id=syllabus_id)
     db.add(msg_bot)
     db.commit()

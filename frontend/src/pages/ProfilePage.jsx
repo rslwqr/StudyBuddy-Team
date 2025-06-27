@@ -1,4 +1,3 @@
-// src/pages/ProfilePage.jsx
 import './ProfilePage.css'
 import { useNavigate } from 'react-router-dom'
 

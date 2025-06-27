@@ -44,12 +44,12 @@
     display: flex;
     justify-content: center;
     gap: 16px;
-    margin-top: 8px; /* было, например, 48px — сделай меньше */
+    margin-top: 8px;
     margin-bottom: 16px;
 }
 
 .pdf-container {
-    margin-top: 8px; /* стало меньше */
+    margin-top: 8px;
     display: flex;
     justify-content: center;
 }
@@ -63,7 +63,7 @@
 }
 
 .upload {
-    background-color: #2E7A53; /* зелёный */
+    background-color: #2E7A53;
     color: white;
     width: 110px;
     border: none;
@@ -81,7 +81,7 @@
 
 .remove {
     width: 110px;
-    background-color: #d9534f; /* красный */
+    background-color: #d9534f;
     color: white;
     border: none;
     border-radius: 30px;
@@ -213,4 +213,34 @@
     border: none;
     font-size: 24px;
     cursor: pointer;
+}
+
+.syllabus-footer-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin: 2rem auto;
+    max-width: 400px;
+    width: 100%;
+}
+
+.syllabus-nav-button {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    cursor: pointer;
+    color: #2d7a52;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.syllabus-nav-button:hover {
+    color: #1e553a;
+}
+
+.syllabus-nav-button.left {
+    text-align: left;
+}
+
+.syllabus-nav-button.right {
+    text-align: right;
 }

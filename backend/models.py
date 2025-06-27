@@ -1,6 +1,7 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.orm import declarative_base, relationship, Mapped, mapped_column
 from datetime import datetime
+from backend.syllabus import parse_pdf
 
 Base = declarative_base()
 
