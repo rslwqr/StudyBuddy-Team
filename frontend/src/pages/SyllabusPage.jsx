@@ -80,7 +80,7 @@ export function SyllabusPage() {
                         onClick={() => fileInputRef.current.click()}
                     >
                         <div className="upload-icon">📄</div>
-                        <h3>{pdfUploaded ? 'Syllabus Already Uploaded' : 'Upload Syllabus PDF'}</h3>
+                        <h3>{pdfUploaded ? 'Syllabus Is Successfully Uploaded' : 'Upload Syllabus PDF'}</h3>
                         <p className="upload-hint">
                             Drag and drop your syllabus file here, or click to browse
                         </p>

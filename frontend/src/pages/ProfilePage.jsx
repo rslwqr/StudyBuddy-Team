@@ -140,7 +140,7 @@ export default function ProfilePage() {
                             <div className="progress-bar-bg">
                                 <div
                                     className="progress-bar-fill"
-                                    style={{ width: '${progress}%' }}
+                                    style={{ width: `${progress}%` }}
                                 />
                             </div>
                             <div

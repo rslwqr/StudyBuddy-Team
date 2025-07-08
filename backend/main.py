@@ -82,12 +82,22 @@ def login_user(data: LoginRequest, db: Session = Depends(get_db)):
     )
     syllabus_id = syllabus.id if syllabus else None
 
+    # Найдём последнюю сессию
+    session = (
+        db.query(ChatSession)
+        .filter(ChatSession.user_id == user.id)
+        .order_by(ChatSession.created_at.desc())
+        .first()
+    )
+    session_id = session.id if session else None
+
     return {
         "user_id": user.id,
         "user_name": user.name,
         "user_email": user.email,
         "message": f"Welcome back, {user.name}!",
-        "syllabus_id": syllabus_id
+        "syllabus_id": syllabus_id,
+        "session_id": session_id
     }
 
 
@@ -202,7 +212,6 @@ def submit_solution(
     user_code = data.code.strip()
     user_id = data.user_id
 
-    # 1) Разбор первой строки
     lines = user_code.splitlines()
     if not lines:
         raise HTTPException(400, "Please, start with: Task N: name of the task")
@@ -215,7 +224,7 @@ def submit_solution(
         )
 
     task_name = m.group(1).strip()
-    # 2) Ищем задачу в БД (по части названия, нечувствительно к регистру)
+
     matched_task = (
         db.query(Task)
         .filter(Task.description.ilike(f"%{task_name}%"))
@@ -227,15 +236,20 @@ def submit_solution(
             f"Task «{task_name}» is not defined. Please check your first line for correct task's name."
         )
 
-    # 3) Формируем prompt для AI-проверки
     prompt = (
-        f"You are a strict Python tutor.\n"
+        f"You are a helpful but strict Python tutor.\n"
         f"Original task:\n{matched_task.description}\n\n"
         f"Student solution (including first line):\n{user_code}\n\n"
-        "If solution fully solves the task reply exactly these words and nothing more:\n"
-        "'Nice job. Let's move on!'\n"
-        f"If solution is not fully covered the task explain shortly but understandably why this solution: \n{user_code} is partly correct."
-        f"If solution: \n{user_code} is absolutely wrong for the : \n{matched_task.description}\n\n. Write: Wrong solution, please resolve it. "
+
+        "INSTRUCTIONS:\n"
+        "1. If the solution is fully correct, reply with:\n"
+        "'Nice job. Let's move on!'\n\n"
+
+        "2. If the solution is incorrect or incomplete:\n"
+        "- First, say: 'Your solution to Task «{matched_task.description}» seems incorrect.'\n"
+        "- Then ask: 'Would you like a hint, or do you prefer to try again yourself?'\n"
+        "- If they later say they want a hint — give a short, clear hint.\n"
+        "- Never write the full solution or copy the student's code again.\n"
     )
 
     headers = {
@@ -260,9 +274,38 @@ def submit_solution(
         )
         db.add(sol);
         db.commit()
-        raise HTTPException(502, "Ошибка при проверке AI, повторите попытку позже.")
+        # check the amount of correct solutions per topic
+        topic = matched_task.topic
+        if topic:
+            correct_count = db.query(Solution).join(Task).filter(
+                Solution.user_id == user_id,
+                Solution.task_id == Task.id,
+                Task.topic_id == topic.id,
+                Solution.is_correct == 1
+            ).count()
+
+            if correct_count == 2:
+                congrats_message = "Great job — you have completed this topic! Ready to tackle the next one, or would you prefer more practice here?"
+                msg_bot = Message(
+                    sender="bot",
+                    content=congrats_message,
+                    user_id=user_id,
+                    syllabus_id=data.syllabus_id,
+                    session_id=data.session_id
+                )
+                db.add(msg_bot)
+                db.commit()
+
+        raise HTTPException(502, "Error AI")
 
     is_correct = "Nice job" in ai_text
+
+    if not is_correct:
+        session = db.query(ChatSession).filter_by(id=data.session_id).first()
+        if session:
+            session.last_failed_task_id = matched_task.id
+            db.commit()
+
     sol = Solution(
         user_id=user_id,
         task_id=matched_task.id,
@@ -272,7 +315,7 @@ def submit_solution(
     db.add(sol);
     db.commit()
 
-    # Сохраняем сообщение пользователя
+
     msg_user = Message(
         sender="user",
         content=user_code,
@@ -281,8 +324,11 @@ def submit_solution(
         session_id=data.session_id
     )
     db.add(msg_user)
+    session = db.query(ChatSession).get(data.session_id)
+    if session:
+        session.last_task_id = matched_task.id
+        db.commit()
 
-    # Сохраняем сообщение от бота
     msg_bot = Message(
         sender="bot",
         content=ai_text,
@@ -294,8 +340,27 @@ def submit_solution(
 
     db.commit()
 
+    topic = matched_task.topic
+    if topic:
+        correct_count = db.query(Solution).join(Task).filter(
+            Solution.user_id == user_id,
+            Solution.task_id == Task.id,
+            Task.topic_id == topic.id,
+            Solution.is_correct == 1
+        ).count()
 
-    # 5) Возвращаем ответ
+        if correct_count == 2:
+            congrats_message = "Great job — you have completed this topic! Ready to tackle the next one, or would you prefer more practice here?"
+            msg_congrats = Message(
+                sender="bot",
+                content=congrats_message,
+                user_id=user_id,
+                syllabus_id=data.syllabus_id,
+                session_id=data.session_id
+            )
+            db.add(msg_congrats)
+            db.commit()
+
     return SolutionResponse(
         evaluation=ai_text,
         is_correct=int(is_correct)
@@ -341,7 +406,8 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         syllabus_dict = {}
         lower_topic_map = {}
 
-    match = re.search(r"Week\s*(\d+)", content, re.IGNORECASE)
+    match = re.search(r"Week\s*(-?\d+)", content, re.IGNORECASE)
+
     week_num = None
     topic_from_week = None
     if match:
@@ -349,6 +415,9 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         topic_from_week = syllabus_dict.get(str(week_num)) or syllabus_dict.get(week_num)
         if topic_from_week:
             content += f"\n(The topic for Week {week_num} is: {topic_from_week})"
+    else:
+        week_num = None
+        topic_from_week = None
 
     found_topic = None
     for week_str, topic in lower_topic_map.items():
@@ -356,15 +425,14 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
             found_topic = syllabus_dict[week_str]
             break
 
-    base = f"""You are a Python tutor. Student level: {user_level}
-    Use this level to adjust task difficulty.
+    base = f"""Use this template for only two generated tasks:
+    Your level: {user_level}
 
-    Use this template for only two generated tasks:
-    Your level: {user_level} \n
     Task 1: <the name of the task>
-    Description: description of the task \n
+    Description: description of the task
+
     Task 2: <the name of the task>
-    Description: description of the task \n
+    Description: description of the task
     """
 
     if week_num and topic_from_week:
@@ -374,13 +442,28 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
             f"Generate two creative practice tasks for this topic only, no solutions. Before tasks write the {user_level}\n\n"
             f"Student's message:\n{content}"
         )
-    elif week_num and not topic_from_week:
-        prompt = base + (
-            f"You are a Python tutor.\n"
-            f"The student asked about Week {week_num}, but no topic was found for this week in the syllabus.\n"
-            f"Ask the student to clarify or check the syllabus.\n\n"
-            f"Student's message:\n{content}"
-        )
+    elif week_num is not None and not topic_from_week:
+
+        bot_reply = f"Week {week_num} is not found in your syllabus. Please enter a valid week number."
+        msg_bot = Message(sender="bot", content=bot_reply, user_id=user_id, syllabus_id=syllabus_id,
+                          session_id=session_id)
+        db.add(msg_bot)
+        db.commit()
+        db.refresh(msg_bot)
+
+        chats = db.query(Message).filter_by(
+            user_id=req.user_id,
+            syllabus_id=req.syllabus_id,
+            session_id=session_id
+        ).order_by(Message.timestamp).all()
+
+        return {
+            "reply": bot_reply,
+            "chat_history": [
+                {"sender": m.sender, "content": m.content, "time": m.timestamp} for m in chats
+            ]
+        }
+
     elif not week_num and found_topic:
         prompt = base + (
             f"You are a Python tutor.\n"
@@ -410,8 +493,6 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         response = requests.post(API_URL, json=data, headers=headers)
         response.raise_for_status()
         result = response.json()
-
-        # Безопасно получаем ответ AI
         bot_reply = result.get("choices", [{}])[0].get("message", {}).get("content", "").strip()
 
         if not bot_reply:
@@ -454,6 +535,41 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         syllabus_id=req.syllabus_id,
         session_id=session_id
     ).order_by(Message.timestamp).all()
+
+
+    if content.strip().lower() in ["i want a hint", "hint", "give me a hint"]:
+        session = db.query(ChatSession).filter_by(id=session_id).first()
+        if session and session.last_failed_task_id:
+            task = db.query(Task).get(session.last_failed_task_id)
+            task_desc = task.description
+
+            hint_prompt = (
+                f"You are a Python tutor.\n"
+                f"The student struggled with the task:\n{task_desc}\n"
+                f"Please give them a helpful but not full solution hint."
+            )
+
+            ai_data = {
+                "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
+                "messages": [{"role": "user", "content": hint_prompt}]
+            }
+            try:
+                response = requests.post(API_URL, json=ai_data, headers=headers)
+                response.raise_for_status()
+                reply = response.json()["choices"][0]["message"]["content"]
+            except:
+                reply = "Failed to generate a hint right now."
+
+            msg_bot = Message(sender="bot", content=reply, user_id=user_id, syllabus_id=syllabus_id,
+                              session_id=session_id)
+            db.add(msg_bot)
+            db.commit()
+
+            chat_history = db.query(Message).filter_by(session_id=session_id).order_by(Message.timestamp).all()
+            return {
+                "reply": reply,
+                "chat_history": [{"sender": m.sender, "content": m.content, "time": m.timestamp} for m in chat_history]
+            }
 
     return {
         "reply": bot_reply,
@@ -711,4 +827,3 @@ def get_chat_history(
     )
 
     return msgs
-
