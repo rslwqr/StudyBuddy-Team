@@ -1,3 +1,12 @@
+body {
+  background-color: white !important;
+}
+
+.top-bar {
+  background-color: #FFFFFF !important;
+}
+
+
 .modal-overlay {
   position: fixed;
   top: 0; left: 0;
@@ -11,7 +20,6 @@
 
 .modal-content {
   position: relative;
-  background: #F9F7F0;
   border-radius: 16px;
   padding: 32px;
   max-width: 400px;

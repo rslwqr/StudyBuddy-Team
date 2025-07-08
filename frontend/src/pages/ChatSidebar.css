@@ -1,0 +1,88 @@
+.chat-sidebar {
+    position: fixed;             /* Важно: фиксированное позиционирование */
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 220px;
+    background-color: rgba(236, 233, 224, 0.95); /* чуть плотнее фон */
+    padding: 16px 12px;
+    z-index: 300;                /* Поверх top-bar (100), chat-main (обычно 1) */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-icons {
+    display: flex;
+    align-items: center;
+    margin-bottom: 12px;
+    position: sticky;
+    top: 0;
+    background-color: rgba(236, 233, 224, 0.95);
+    z-index: 10;
+    padding-bottom: 8px;
+}
+
+
+.chat-list-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 100%;
+    justify-content: space-between;
+}
+
+.chat-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+.chat-item {
+    background-color: #C3BEB1;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.chat-item.active {
+    background-color: #6BA268;
+}
+
+.chat-title {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.chat-subtitle {
+    font-size: 13px;
+    opacity: 0.9;
+    margin-top: 2px;
+}
+
+.sidebar-icons .top-icon {
+    width: 20px;
+    height: auto;
+    margin-right: 16px;
+    cursor: pointer;
+}
+
+.chat-footer {
+    padding-top: 12px;
+    font-size: 13px;
+    text-align: center;
+    color: #5D5D5D;
+}
+
+
+.sticky-icons {
+    position: sticky;
+    top: 0;
+    background-color: rgba(236, 233, 224, 0.3);
+    z-index: 10;
+    padding-bottom: 8px;
+}

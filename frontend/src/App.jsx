@@ -6,6 +6,11 @@ import ProfilePage from './pages/ProfilePage'
 import ChatPage from './pages/ChatPage'
 import SignupPage from './pages/SignupPage'
 import LoginPage from './pages/LoginPage'
+import { LevelPage } from './pages/LevelPage';
+
+// внутри <Routes>
+
+
 
 import './App.css'
 
@@ -26,8 +31,11 @@ export default function App() {
                     }
                 />
                 <Route path="/syllabus" element={<SyllabusPage />} />
+                <Route path="/signup" element={<SignupPage />} />
+                <Route path="/login" element={<LoginPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
                 <Route path="/chat" element={<ChatPage />} />
+                <Route path="/custom" element={<LevelPage />} />
             </Routes>
 
             {showSignup && (

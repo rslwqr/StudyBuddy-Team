@@ -1,44 +1,118 @@
-.register-form {
+/* src/pages/SignupPage.css */
+.signup-page {
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(to right, #D0E2CC, #F1DACD);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+}
+
+.signup-form-container {
+    background-color: white;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #555;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.signup-form-container h2 {
+    text-align: center;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #000;
+}
+
+.subtitle {
+    text-align: center;
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+.signup-form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    font-family: 'Instrument Sans', sans-serif;
-    max-width: 400px;
-    margin: 0 auto;
+    gap: 20px;
 }
 
-.register-form label {
-    font-size: 16px;
-    font-weight: 400;
-    color: #445450;
-}
-
-
-.register-form input {
-    width: 90%;
-    padding: 12px 16px;
+.signup-form input {
+    padding: 14px 20px;
     border: 1px solid #ccc;
-    border-radius: 35px;
-    font-size: 16px;
+    border-radius: 12px;
+    font-size: 15px;
     font-family: inherit;
 }
 
-.register-form button {
-    align-self: center;
-    width: 140px;
-    height: 45px;
-    background-color: #2E7A53;
+.signup-form button {
+    padding: 14px;
+    background-color: #FF944A;
     color: white;
+    font-size: 16px;
+    font-weight: 500;
     border: none;
-    border-radius: 35px;
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 17px;
-    font-weight: 400;
+    border-radius: 12px;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    line-height: 1;
     transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
-.register-form button:hover {
+.signup-form button:hover {
     transform: translateY(-2px);
     opacity: 0.9;
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    flex: 1;
+    padding-right: 48px; /* место для иконки */
+}
+
+.eye-icon {
+    position: absolute;
+    right: 16px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.6;
+}
+.eye-icon:hover {
+    opacity: 1;
+}
+
+.signup-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
+}
+
+.signup-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
 }

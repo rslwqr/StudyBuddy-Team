@@ -1,157 +1,123 @@
-import { useEffect, useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
-import './SyllabusPage.css'
-import logo from '../assets/logo.svg'
-import chatIcon from '../assets/chat_icon.svg'
-import profileIcon from '../assets/profile_icon.svg'
+import { useEffect, useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import './SyllabusPage.css';
+import { TopBar } from './TopBar';
 
 export function SyllabusPage() {
-    const [pdfUrl, setPdfUrl] = useState(null)
-    const [, setStatus] = useState('')
-    const fileInputRef = useRef()
-    const navigate = useNavigate()
-    const userId = localStorage.getItem('user_id')
+    const [pdfUploaded, setPdfUploaded] = useState(false);
+    const [uploadedFileName, setUploadedFileName] = useState('');
+    const fileInputRef = useRef();
+    const navigate = useNavigate();
+    const userId = localStorage.getItem('user_id');
 
     useEffect(() => {
         const fetchSyllabus = async () => {
             try {
-                const res = await fetch(`http://127.0.0.1:8000/download_syllabus?user_id=${userId}`)
-                if (!res.ok) {
-                    setStatus('No syllabus uploaded yet.')
-                    localStorage.removeItem('syllabus_uploaded')
-                    return
+                const res = await fetch(`http://127.0.0.1:8000/download_syllabus?user_id=${userId}`);
+                if (res.ok) {
+                    setPdfUploaded(true);
+                    setUploadedFileName('Name_of_syllabus_file.pdf'); // можно заменить на имя из API
+                } else {
+                    setPdfUploaded(false);
                 }
-                const blob = await res.blob()
-                setPdfUrl(URL.createObjectURL(blob))
-                setStatus('')
-                localStorage.setItem('syllabus_uploaded', 'true')
             } catch {
-                setStatus('Failed to load syllabus')
+                setPdfUploaded(false);
             }
-        }
+        };
 
         if (userId) {
-            fetchSyllabus()
+            fetchSyllabus();
         }
-    }, [userId])
+    }, [userId]);
 
     const handleUpload = async (e) => {
-        const file = e.target.files[0]
-        if (!file) return
+        const file = e.target.files[0];
+        if (!file) return;
+        e.target.value = null;
 
-        e.target.value = null
-
-        const form = new FormData()
-        form.append('file', file)
+        const form = new FormData();
+        form.append('file', file);
 
         try {
             const res = await fetch(`http://127.0.0.1:8000/upload_syllabus?user_id=${userId}`, {
                 method: 'POST',
                 body: form,
-            })
+            });
 
-            if (!res.ok) throw new Error()
-
-            const data = await res.json()
-            const syllabusId = data.syllabus_id
-            localStorage.setItem('syllabus_id', syllabusId)
-
-            const blob = new Blob([file], {type: 'application/pdf'})
-            setPdfUrl(URL.createObjectURL(blob))
-            setStatus('Syllabus uploaded successfully')
-            localStorage.setItem('syllabus_uploaded', 'true')
-
-            navigate('/chat')
-
+            if (res.ok) {
+                const {syllabus_id} = await res.json();
+                localStorage.setItem('syllabus_id', syllabus_id);
+                setPdfUploaded(true);
+                setUploadedFileName(file.name);
+            }
         } catch (error) {
-            console.error('Upload error:', error)
-            setStatus('Upload failed')
+            console.error('Upload error:', error);
         }
-    }
+    };
 
     const handleRemove = async () => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/syllabus?user_id=${userId}`, {
+            await fetch(`http://127.0.0.1:8000/syllabus?user_id=${userId}`, {
                 method: 'DELETE',
-            })
-            if (!res.ok) throw new Error()
-
-            setPdfUrl(null)
-            setStatus('Syllabus removed')
-            localStorage.removeItem('syllabus_uploaded')
-            localStorage.removeItem('syllabus_id')
-
-            if (fileInputRef.current) {
-                fileInputRef.current.value = null
-            }
-        } catch {
-            setStatus('Failed to remove syllabus')
+            });
+            setPdfUploaded(false);
+            setUploadedFileName('');
+        } catch (error) {
+            console.error('Remove error:', error);
         }
-    }
+    };
 
     return (
-        <div className="page syllabus-page">
-            <header className="top-bar">
-                <div className="left-header" onClick={() => navigate('/')} style={{cursor: 'pointer'}}>
-                    <img src={logo} alt="StudyBuddy Logo" className="logo"/>
-                </div>
+        <>
+            <TopBar forceShowLogout />
+            <div className="syllabus-background">
+                <div className="syllabus-card">
+                    <h2>Syllabus Management</h2>
+                    <p>Upload and manage your Python learning curriculum (PDF format)</p>
 
-                <h1 className="header-center-title">Syllabus</h1>
-
-                <div className="right-header">
-                    <img
-                        src={chatIcon}
-                        alt="Chat"
-                        className="icon-btn"
-                        onClick={() => navigate('/chat')}
-                    />
-                    <img
-                        src={profileIcon}
-                        alt="Profile"
-                        className="icon-btn"
-                        onClick={() => navigate('/profile')}
-                    />
-                </div>
-            </header>
-
-            <div className="pdf-controls">
-                <button className="upload" onClick={() => fileInputRef.current.click()}>
-                    Upload
-                </button>
-
-                {pdfUrl && (
-                    <button className="remove" onClick={handleRemove}>
-                        Remove
-                    </button>
-                )}
-
-                <input
-                    type="file"
-                    accept="application/pdf"
-                    onChange={handleUpload}
-                    style={{display: 'none'}}
-                    ref={fileInputRef}
-                />
-            </div>
-
-            <div className="pdf-container">
-                {pdfUrl ? (
-                    <embed src={pdfUrl} type="application/pdf" className="pdf-viewer"/>
-                ) : (
-                    <div className="pdf-placeholder">
-                        Your syllabus will appear here after upload.
+                    <div
+                        className={`upload-box ${pdfUploaded ? 'uploaded' : ''}`}
+                        onClick={() => fileInputRef.current.click()}
+                    >
+                        <div className="upload-icon">📄</div>
+                        <h3>{pdfUploaded ? 'Syllabus Already Uploaded' : 'Upload Syllabus PDF'}</h3>
+                        <p className="upload-hint">
+                            Drag and drop your syllabus file here, or click to browse
+                        </p>
+                        <input
+                            type="file"
+                            accept="application/pdf"
+                            ref={fileInputRef}
+                            onChange={handleUpload}
+                            style={{ display: 'none' }}
+                        />
                     </div>
-                )}
-            </div>
-            <div className="syllabus-footer-buttons">
-                <button className="syllabus-nav-button left" onClick={() => navigate('/')}>
-                    ← Back to Home
-                </button>
-                <button className="syllabus-nav-button right" onClick={() => navigate('/chat')}>
-                    Go to Chat →
-                </button>
-            </div>
 
-        </div>
-    )
+                    <div className="upload-actions">
+                        <button className="btn orange" onClick={() => fileInputRef.current.click()}>
+                            {pdfUploaded ? 'Change Syllabus' : 'Upload Syllabus'}
+                        </button>
+                        {pdfUploaded && (
+                            <button className="btn red" onClick={handleRemove}>
+                                Remove Syllabus
+                            </button>
+                        )}
+                    </div>
+
+                    {pdfUploaded && (
+                        <div className="file-summary">
+                            <div><strong>{uploadedFileName}</strong></div>
+                            <div className="file-meta">
+                                <span>Uploaded on: Jul 2, 2025</span>
+                                <span>Size: 0.5 MB</span>
+                            </div>
+                            <div className="file-status">
+                                ✅ Syllabus processed and ready for AI analysis
+                            </div>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </>
+    );
 }

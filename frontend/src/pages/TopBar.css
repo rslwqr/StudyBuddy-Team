@@ -1,0 +1,99 @@
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 300;
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    font-family: 'Inter', sans-serif;
+}
+
+.top-bar-left,
+.top-bar-right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 32px;
+}
+
+.top-icon {
+    width: 20px;
+    height: auto;
+    margin-right: 24px;
+    cursor: pointer;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2.5rem;
+    flex: 1;
+    justify-content: center;
+}
+
+.nav-links a {
+    text-decoration: none;
+    color: #333;
+    font-size: 0.875rem;
+    font-weight: 400;
+    transition: color 0.2s, font-weight 0.2s;
+}
+
+.nav-links a:hover {
+    color: #EA733F;
+}
+
+.nav-links a.active {
+    font-weight: 600;
+    color: #000;
+}
+
+.logout-btn {
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    border: 2px solid #EA733F;
+    background: #fff;
+    color: #EA733F;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+}
+.logout-btn:hover {
+    background: #fff5f0;
+}
+
+.login-btn {
+    background-color: transparent;
+    color: #5D916D;
+    border: 2px solid #5D916D;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.signup-btn {
+    background-color: #5D916D;
+    color: white;
+    border: none;
+    padding: 0.5rem 1.25rem;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.login-btn,
+.signup-btn {
+    margin-left: 0.5rem;
+}

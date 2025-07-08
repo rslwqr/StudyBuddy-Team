@@ -1,17 +1,26 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
 from sqlalchemy.orm import declarative_base, relationship, Mapped, mapped_column
 from datetime import datetime
-from backend.syllabus import parse_pdf
+from syllabus import parse_pdf
+from sqlalchemy import Column, Integer, String, ForeignKey, Text
+from sqlalchemy.orm import relationship
 
 Base = declarative_base()
 
+
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True)
-    email = Column(String, unique=True)
+
+    id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
-    syllabuses = relationship("Syllabus", back_populates="user")
+    email = Column(String, unique=True, index=True)
+    password = Column(String)
+    difficulty = Column(String, default="Beginner")
+    progress = Column(Integer, default=0)
+
     messages = relationship("Message", back_populates="user")
+    syllabuses = relationship("Syllabus", back_populates="user")
+    solutions = relationship("Solution", back_populates="user")
 
 class Syllabus(Base):
     __tablename__ = "syllabuses"
@@ -33,6 +42,8 @@ class Message(Base):
     syllabus_id = Column(Integer, ForeignKey("syllabuses.id"))
     user = relationship("User", back_populates="messages")
     syllabus = relationship("Syllabus", back_populates="messages")
+    session_id = Column(Integer, ForeignKey("chat_sessions.id"), nullable=False)
+    session = relationship("ChatSession", back_populates="messages")
 
 
 class Topic(Base):
@@ -52,6 +63,7 @@ class Task(Base):
     topic = relationship("Topic", back_populates="tasks")
     solutions = relationship("Solution", back_populates="task")
 
+
 class Solution(Base):
     __tablename__ = "solutions"
     id = Column(Integer, primary_key=True)
@@ -61,6 +73,7 @@ class Solution(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     task_id = Column(Integer, ForeignKey("tasks.id"))
     task = relationship("Task", back_populates="solutions")
+    user = relationship("User", back_populates="solutions")
 
 class EmailCode(Base):
     __tablename__ = "email_codes"
@@ -68,5 +81,17 @@ class EmailCode(Base):
     email: Mapped[str] = mapped_column(unique=True)
     code: Mapped[str]
     created_at: Mapped[datetime] = mapped_column(default=datetime.utcnow)
+
+class ChatSession(Base):
+    __tablename__ = "chat_sessions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="chat_sessions")
+    messages = relationship("Message", back_populates="session", cascade="all, delete")
+
+User.chat_sessions = relationship("ChatSession", back_populates="user")
 
 

@@ -1,45 +1,113 @@
+/* src/pages/LoginPage.css */
+.login-page {
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(to right, #D0E2CC, #F1DACD);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Inter', sans-serif;
+}
+
+.login-container {
+    background-color: white;
+    border-radius: 12px;
+    padding: 40px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    text-align: center;
+}
+
+.back-button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #555;
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.login-heading {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: #000;
+}
+
+.login-subheading {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 30px;
+}
+
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    font-family: 'Instrument Sans', sans-serif;
-    max-width: 400px;
-    margin: 0 auto;
+    gap: 20px;
 }
 
-
-.login-form label {
-    font-size: 16px;
-    font-weight: 400;
-    color: #445450;
+.login-field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    text-align: left;
 }
 
+.login-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+}
 
-.login-form input {
-    width: 90%;
-    padding: 12px 16px;
+.login-input {
+    padding: 14px 20px;
     border: 1px solid #ccc;
-    border-radius: 35px;
-    font-size: 16px;
+    border-radius: 12px;
+    font-size: 15px;
     font-family: inherit;
 }
 
-.login-form button {
-    align-self: center;
-    width: 140px;
-    height: 45px;
-    background-color: #2E7A53;
+.login-button {
+    padding: 14px;
+    background-color: #6BA268;
     color: white;
+    font-size: 16px;
     border: none;
-    border-radius: 35px;
-    font-size: 17px;
-    font-weight: 400;
-    font-family: 'Instrument Sans', sans-serif;
+    border-radius: 12px;
+    font-weight: 500;
     cursor: pointer;
     transition: transform 0.2s ease-in-out, opacity 0.2s ease-in-out;
 }
 
-.login-form button:hover {
+.login-button:hover {
     transform: translateY(-2px);
     opacity: 0.9;
+}
+
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper input {
+    flex: 1;
+    padding-right: 48px;
+}
+
+.eye-icon {
+    position: absolute;
+    right: 16px;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    opacity: 0.6;
+}
+.eye-icon:hover {
+    opacity: 1;
 }

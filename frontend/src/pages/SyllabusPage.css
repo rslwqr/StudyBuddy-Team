@@ -1,246 +1,122 @@
-.top-bar {
+.syllabus-background {
+    background: linear-gradient(to right, #d6e8d1, #fcecd8);
+    min-height: 100vh;
+    padding: 0;
+    margin: 0;
+    font-family: 'Inter', sans-serif;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px 32px;
-    background-color: #F9F7F0;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 40px;
 }
 
-.left-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
+.syllabus-card {
+    margin-top: 100px;
+    width: 100%;
+    max-width: 640px;
+    background: white;
+    border-radius: 16px;
+    padding: 40px 32px;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
-.logo {
-    height: 48px;
+.syllabus-card h2 {
+    font-size: 26px;
+    margin-bottom: 10px;
+    color: #3b5c4d;
 }
 
-.header-center-title {
-    font-size: 32px;
-    font-weight: bold;
-    font-family: 'Instrument Sans', sans-serif;
-    color: black;
+.syllabus-card p {
+    font-size: 15px;
+    margin-bottom: 32px;
+    color: #555;
 }
 
-.right-header {
-    display: flex;
-    align-items: center;
-    gap: 24px;
-}
-
-.icon-btn {
-    width: 38px;
-    height: 38px;
+.upload-box {
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    padding: 40px 24px;
     cursor: pointer;
-    transition: opacity 0.2s ease-in-out;
+    transition: background 0.2s ease-in-out;
+    background-color: #fff;
+    margin-bottom: 24px;
 }
 
-.icon-btn:hover {
-    opacity: 0.7;
+.upload-box:hover {
+    background-color: #fafafa;
 }
 
-.pdf-controls {
+.upload-box.uploaded {
+    border: 2px dashed #ff8933;
+    background-color: #fff4eb;
+}
+
+.upload-icon {
+    font-size: 36px;
+    margin-bottom: 16px;
+    color: #ff8933;
+}
+
+.upload-hint {
+    color: #aaa;
+    font-size: 14px;
+    margin: 8px 0 24px;
+}
+
+.upload-actions {
     display: flex;
     justify-content: center;
     gap: 16px;
-    margin-top: 8px;
-    margin-bottom: 16px;
-}
-
-.pdf-container {
-    margin-top: 8px;
-    display: flex;
-    justify-content: center;
-}
-
-.pdf-viewer {
-    width: 700px;
-    height: 1200px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.upload {
-    background-color: #2E7A53;
-    color: white;
-    width: 110px;
-    border: none;
-    border-radius: 30px;
-    padding: 10px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.2s ease-in-out;
-}
-
-.upload:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.remove {
-    width: 110px;
-    background-color: #d9534f;
-    color: white;
-    border: none;
-    border-radius: 30px;
-    padding: 10px 24px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: 0.2s ease-in-out;
-}
-
-.remove:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
-}
-
-.pdf-container {
     margin-top: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 400px;
+    flex-wrap: wrap;
 }
 
-.pdf-placeholder {
-    width: 600px;
-    height: 750px;
-    background-color: white;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #888;
-    font-family: 'Instrument Sans', sans-serif;
-    font-size: 18px;
-    text-align: center;
-    padding: 24px;
-}
-
-
-
-.status {
-    font-size: 16px;
-    color: #445450;
-    text-align: center;
-}
-
-.syllabus-nav-links {
-    display: flex;
-    justify-content: center;
-    gap: 48px;
-    margin-top: 24px;
-}
-
-.nav-link {
-    font-size: 16px;
-    color: #2E7A53;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s ease-in-out;
-}
-
-.nav-link:hover {
-    opacity: 0.7;
-}
-
-.register-form label {
-    display: block;
-    margin-bottom: 16px;
-    font-size: 16px;
-    font-family: 'Instrument Sans', sans-serif;
-    color: #445450;
-}
-
-.register-form input {
-    display: block;
-    width: 100%;
-    padding: 10px 12px;
-    font-size: 14px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    margin-top: 6px;
-    font-family: 'Instrument Sans', sans-serif;
-}
-
-.register-form button {
-    background-color: #2E7A53;
-    color: white;
-    font-size: 16px;
-    padding: 10px 24px;
+.btn {
+    padding: 12px 24px;
+    border: none;
     border-radius: 30px;
-    border: none;
+    font-size: 15px;
     cursor: pointer;
-    transition: 0.2s ease-in-out;
-    width: 100%;
+    transition: transform 0.2s ease-in-out;
+    color: white;
+    min-width: 160px;
+    max-width: 220px;
+    text-align: center;
 }
 
-.register-form button:hover {
+.btn:hover {
+    transform: translateY(-2px);
     opacity: 0.9;
-    transform: translateY(-1px);
 }
 
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.4);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.btn.orange {
+    background-color: #ff8933;
 }
 
-.modal-content {
-    background: white;
-    padding: 32px;
-    border-radius: 12px;
-    width: 400px;
-    position: relative;
+.btn.red {
+    background-color: #dc3545;
 }
 
-.modal-close {
-    position: absolute;
-    top: 12px;
-    right: 16px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-}
-
-.syllabus-footer-buttons {
-    display: flex;
-    justify-content: space-between;
-    margin: 2rem auto;
-    max-width: 400px;
-    width: 100%;
-}
-
-.syllabus-nav-button {
-    background: none;
-    border: none;
-    font-size: 1.1rem;
-    cursor: pointer;
-    color: #2d7a52;
-    font-weight: 500;
-    transition: color 0.2s ease;
-}
-
-.syllabus-nav-button:hover {
-    color: #1e553a;
-}
-
-.syllabus-nav-button.left {
+.file-summary {
+    background-color: #e8fbe8;
+    border: 1px solid #b7e7b7;
+    padding: 16px;
+    margin-top: 20px;
+    border-radius: 10px;
     text-align: left;
 }
 
-.syllabus-nav-button.right {
-    text-align: right;
+.file-meta {
+    font-size: 14px;
+    color: #555;
+    margin-top: 8px;
+    display: flex;
+    gap: 16px;
+}
+
+.file-status {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #2d7a52;
 }
