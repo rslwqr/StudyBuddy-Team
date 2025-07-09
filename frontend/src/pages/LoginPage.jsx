@@ -36,6 +36,9 @@ export default function LoginPage() {
             } else {
                 localStorage.removeItem('syllabus_id');
             }
+            if (data.session_id) {
+                localStorage.setItem('session_id', data.session_id);
+            }
             navigate('/');
         } catch (err) {
             console.error('Network error:', err);
