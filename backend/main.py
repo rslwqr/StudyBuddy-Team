@@ -441,15 +441,17 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         if topic in content.lower():
             found_topic = syllabus_dict[week_str]
             break
+    # Проверяем: это первое сообщение в текущей сессии?
+    messages_in_session = db.query(Message).filter_by(session_id=session_id).count()
+    if messages_in_session == 1 and msg_user.sender == "user":
+        if topic_from_week:
+            session.name = f"Week {week_num}: {topic_from_week}"
+        elif found_topic:
+            session.name = f"Topic: {found_topic}"
+        else:
+            session.name = f"Chat {session.chat_number}"
+        db.commit()
 
-    # Название чата на основе week/topic
-    if topic_from_week:
-        session.name = f"Week {week_num}: {topic_from_week}"
-    elif found_topic:
-        session.name = f"Topic: {found_topic}"
-    else:
-        session.name = f"Chat {session.chat_number}"
-    db.commit()
 
     base = f"""Use this template for only two generated tasks:
     Your level: {user_level}
