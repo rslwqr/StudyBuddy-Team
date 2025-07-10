@@ -1,6 +1,7 @@
 import './ChatSidebar.css';
 import chatMenuIcon from '../assets/chat-menu-icon.svg';
 import newChatIcon from '../assets/new-chat-icon.svg';
+import trashIcon from '../assets/trash_icon.svg';
 
 export default function ChatSidebar({
                                         chatSessions,
@@ -9,6 +10,7 @@ export default function ChatSidebar({
                                         onNewChat,
                                         isSidebarOpen,
                                         onCloseSidebar,
+                                        onDeleteChat,
                                     }) {
     if (!isSidebarOpen) return null;
 
@@ -37,7 +39,18 @@ export default function ChatSidebar({
                             className={`chat-item ${session.session_id === activeSessionId ? 'active' : ''}`}
                             onClick={() => onSelectSession(session.session_id)}
                         >
-                            <div className="chat-title">{session.name}</div>
+                            <div className="chat-header">
+                                <div className="chat-title">{session.name}</div>
+                                <img
+                                    src={trashIcon}
+                                    alt="Delete"
+                                    className="chat-delete-icon"
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        onDeleteChat(session.session_id);
+                                    }}
+                                />
+                            </div>
                             <div className="chat-subtitle">
                                 {session.messages?.[0]?.text?.slice(0, 30) || 'No messages'}
                             </div>

@@ -5,7 +5,6 @@ import ReactMarkdown from 'react-markdown';
 import { TopBar } from './TopBar';
 import ChatSidebar from '../pages/ChatSidebar';
 
-import pencilIcon from '../assets/pencil-icon.svg';
 import sendButtonIcon from '../assets/send-button.svg';
 import stopButtonIcon from '../assets/stop-button.svg';
 
@@ -21,6 +20,10 @@ export default function ChatPage() {
     const abortControllerRef = useRef(null);
     const textareaRef = useRef(null);
     const bottomRef = useRef(null);
+
+    const scrollToBottom = (smooth = false) => {
+        bottomRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
+    };
 
     const user_id = +localStorage.getItem('user_id');
     const syllabus_id = +localStorage.getItem('syllabus_id');
@@ -38,7 +41,18 @@ export default function ChatPage() {
                 setMessages(formatted);
             }
         } catch (err) {
-            console.error("Ошибка при получении истории чата", err);
+            console.error("Failed to fetch chat history", err);
+        }
+    };
+
+    const fetchSessionList = async () => {
+        try {
+            const res = await fetch(`http://127.0.0.1:8000/user_sessions/${user_id}`);
+            const data = await res.json();
+            setChatSessions(data);
+            localStorage.setItem('chat_sessions', JSON.stringify(data));
+        } catch (err) {
+            console.error("Failed to fetch session list", err);
         }
     };
 
@@ -52,43 +66,14 @@ export default function ChatPage() {
         const name = localStorage.getItem('user_name');
         if (name) setUserName(name);
 
-        const saved = localStorage.getItem('chat_sessions');
-        if (saved) setChatSessions(JSON.parse(saved));
+        fetchSessionList();
 
         const existingSession = localStorage.getItem('session_id');
         if (existingSession) {
             setSessionId(+existingSession);
             fetchChatHistory(+existingSession);
-        } else {
-            // 👇 Создаём новую сессию, если её нет
-            fetch('http://127.0.0.1:8000/sessions', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ user_id }),
-            })
-                .then(res => res.json())
-                .then(data => {
-                    localStorage.setItem('session_id', data.session_id);
-                    setSessionId(data.session_id);
-                    fetchChatHistory(data.session_id);
-                })
-                .catch(err => {
-                    console.error('Ошибка создания сессии:', err);
-                });
         }
     }, [user_id, syllabus_id]);
-
-
-    useEffect(() => {
-        const last = messages[messages.length - 1];
-        if (last?.sender === 'bot' || last?.text === 'loading') {
-            scrollToBottom(true);
-        }
-    }, [messages]);
-
-    const scrollToBottom = (smooth = false) => {
-        bottomRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
-    };
 
     const isLikelyCode = text => /Task\s*\d+:/.test(text);
 
@@ -108,25 +93,39 @@ export default function ChatPage() {
             const data = await res.json();
 
             if (!res.ok) {
-                const errMsg = data.detail || 'Ошибка при проверке решения';
+                const errMsg = data.detail || 'Solution submission failed';
                 throw new Error(errMsg);
             }
 
             await fetchChatHistory(sessionId);
         } catch (err) {
             console.error(err);
-            setMessages(prev => [
-                ...prev,
-                { sender: 'bot', text: err.message }
-        ]);
+            setMessages(prev => [...prev, { sender: 'bot', text: err.message }]);
             scrollToBottom();
         }
     };
 
     const sendMessage = async content => {
-        if (!sessionId) return;
+        if (!sessionId) {
+            // Create session dynamically
+            try {
+                const res = await fetch('http://127.0.0.1:8000/sessions', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id }),
+                });
+                const data = await res.json();
+                localStorage.setItem('session_id', data.session_id);
+                setSessionId(data.session_id);
 
-        // сразу добавляем user-сообщение и placeholder «loading»
+                await fetchSessionList();
+            } catch (err) {
+                console.error('Failed to create session:', err);
+                return;
+            }
+        }
+
+        // Add user's message and loading placeholder
         setMessages(prev => [
             ...prev,
             { sender: 'user', text: content },
@@ -145,7 +144,7 @@ export default function ChatPage() {
                 body: JSON.stringify({
                     user_id,
                     syllabus_id,
-                    session_id: sessionId,
+                    session_id: sessionId ?? +localStorage.getItem('session_id'),
                     content
                 }),
                 signal: ctrl.signal,
@@ -153,7 +152,6 @@ export default function ChatPage() {
             if (!res.ok) throw new Error();
             const { reply } = await res.json();
 
-            // стримим по символу, обновляя последний бот-месседж
             let soFar = '';
             for (let ch of reply) {
                 if (ctrl.signal.aborted) break;
@@ -168,10 +166,7 @@ export default function ChatPage() {
             }
         } catch (err) {
             if (err.name !== 'AbortError') {
-                setMessages(prev => [
-                    ...prev,
-                    { sender: 'bot', text: '⚠️ AI error: could not respond.' }
-                ]);
+                setMessages(prev => [...prev, { sender: 'bot', text: '⚠️ AI error: could not respond.' }]);
             }
         } finally {
             setIsStreaming(false);
@@ -179,15 +174,9 @@ export default function ChatPage() {
         }
     };
 
-
     const handleSend = async () => {
         const txt = input.trim();
         if (!txt) return;
-
-        if (!sessionId) {
-            alert("⚠️ Chat session is not ready yet. Please wait a moment.");
-            return;
-        }
 
         setInput('');
         if (textareaRef.current) textareaRef.current.style.height = 'auto';
@@ -210,7 +199,6 @@ export default function ChatPage() {
     return (
         <div className="chat-layout">
             <TopBar onMenuClick={() => setIsSidebarOpen(true)} isSidebarOpen={isSidebarOpen} />
-
             <ChatSidebar
                 chatSessions={chatSessions}
                 activeSessionId={sessionId}
@@ -227,9 +215,29 @@ export default function ChatPage() {
                         body: JSON.stringify({ user_id }),
                     });
                     const data = await res.json();
+
                     setSessionId(data.session_id);
                     setMessages([]);
                     localStorage.setItem('session_id', data.session_id);
+
+                    await fetchSessionList();
+                }}
+                onDeleteChat={async (chatIdToDelete) => {
+                    const confirmed = window.confirm("Are you sure you want to delete this chat?");
+                    if (!confirmed) return;
+
+                    try {
+                        await fetch(`http://127.0.0.1:8000/sessions/${chatIdToDelete}`, { method: 'DELETE' });
+                        await fetchSessionList();
+
+                        if (sessionId === chatIdToDelete) {
+                            setMessages([]);
+                            setSessionId(null);
+                            localStorage.removeItem('session_id');
+                        }
+                    } catch (err) {
+                        console.error("Failed to delete chat session:", err);
+                    }
                 }}
                 isSidebarOpen={isSidebarOpen}
                 onCloseSidebar={() => setIsSidebarOpen(false)}
@@ -260,7 +268,6 @@ export default function ChatPage() {
                             <div ref={bottomRef} />
                         </div>
                     )}
-
                     <div className="chat-input-bar">
                         <textarea
                             ref={textareaRef}
