@@ -75,6 +75,7 @@ class Solution(Base):
     task = relationship("Task", back_populates="solutions")
     user = relationship("User", back_populates="solutions")
 
+
 class EmailCode(Base):
     __tablename__ = "email_codes"
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
@@ -90,6 +91,9 @@ class ChatSession(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     last_task_id = Column(Integer, nullable=True)
     last_failed_task_id = Column(Integer, nullable=True)
+
+    name = Column(String)
+    chat_number = Column(Integer, nullable=True)
 
     user = relationship("User", back_populates="chat_sessions")
     messages = relationship("Message", back_populates="session", cascade="all, delete")

@@ -196,12 +196,23 @@ def download_syllabus(user_id: int, db: Session = Depends(get_db)):
 
 @app.post("/sessions", response_model=SessionResponse)
 def create_session(data: SessionCreateRequest, db: Session = Depends(get_db)):
-    session = ChatSession(user_id=data.user_id)
+    last = (
+        db.query(ChatSession)
+        .filter(ChatSession.user_id == data.user_id)
+        .order_by(ChatSession.chat_number.desc())
+        .first()
+    )
+    next_number = (last.chat_number if last and last.chat_number else 0) + 1
+
+    session = ChatSession(
+        user_id=data.user_id,
+        chat_number=next_number,
+        name=f"Chat {next_number}"  # временно, потом будет обновлено в /chat
+    )
     db.add(session)
     db.commit()
     db.refresh(session)
     return {"session_id": session.id, "created_at": session.created_at}
-
 
 
 @app.post("/submit_solution", response_model=SolutionResponse)
@@ -273,6 +284,12 @@ def submit_solution(
             is_correct=0
         )
         db.add(sol);
+        if topic_from_week:
+            session.name = f"Week {week_num}: {topic_from_week}"
+        elif found_topic:
+            session.name = f"Topic: {found_topic}"
+        else:
+            session.name = f"Chat {session.id}"  # fallback
         db.commit()
         # check the amount of correct solutions per topic
         topic = matched_task.topic
@@ -424,6 +441,15 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         if topic in content.lower():
             found_topic = syllabus_dict[week_str]
             break
+
+    # Название чата на основе week/topic
+    if topic_from_week:
+        session.name = f"Week {week_num}: {topic_from_week}"
+    elif found_topic:
+        session.name = f"Topic: {found_topic}"
+    else:
+        session.name = f"Chat {session.chat_number}"
+    db.commit()
 
     base = f"""Use this template for only two generated tasks:
     Your level: {user_level}
@@ -827,3 +853,41 @@ def get_chat_history(
     )
 
     return msgs
+
+
+@app.get("/user_sessions/{user_id}")
+def get_user_sessions(user_id: int, db: Session = Depends(get_db)):
+    sessions = (
+        db.query(ChatSession)
+        .filter(ChatSession.user_id == user_id)
+        .order_by(ChatSession.created_at.desc())
+        .all()
+    )
+
+    result = []
+    for session in sessions:
+        first_msg = (
+            db.query(Message)
+            .filter(Message.session_id == session.id)
+            .order_by(Message.timestamp)
+            .first()
+        )
+        result.append({
+            "session_id": session.id,
+            "name": session.name or f"Chat {session.id}",
+            "messages": [{"text": first_msg.content}] if first_msg else []
+        })
+
+    return result
+
+@app.delete("/sessions/{session_id}")
+def delete_session(session_id: int, db: Session = Depends(get_db)):
+    session = db.query(ChatSession).get(session_id)
+    if not session:
+        raise HTTPException(404, "Session not found")
+
+    # Удаляем все сообщения этой сессии
+    db.query(Message).filter(Message.session_id == session_id).delete()
+    db.delete(session)
+    db.commit()
+    return {"message": "Session deleted"}
