@@ -1,14 +1,14 @@
 from fastapi import FastAPI
 from fastapi import Query
-from backend.email_utils import send_reminder_email
-from backend.models import ChatSession
+from email_utils import send_reminder_email
+from models import ChatSession
 from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 load_dotenv()
 
 app = FastAPI()
 from apscheduler.schedulers.background import BackgroundScheduler
-from backend.email_utils import send_reminder_email
+from email_utils import send_reminder_email
 from pydantic import BaseModel
 scheduler = BackgroundScheduler()
 
@@ -24,7 +24,7 @@ def send_all_reminders():
 
 
 # Каждый день в 10:00
-scheduler.add_job(send_all_reminders, 'cron', hour=15, minute=23)
+scheduler.add_job(send_all_reminders, 'cron', hour=19, minute=55)
 scheduler.start()
 
 import datetime
@@ -43,14 +43,14 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
-from backend.models import Base, User, Syllabus, Message, EmailCode
-from backend.models import Solution, Task
-from backend.models import Topic
+from models import Base, User, Syllabus, Message, EmailCode
+from models import Solution, Task
+from models import Topic
 from datetime import datetime
 from typing import List
 
 load_dotenv()
-API_KEY = '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'
+API_KEY = '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'
 API_URL = 'https://openrouter.ai/api/v1/chat/completions'
 
 DATABASE_URL = "sqlite:///studybuddy1.db"
@@ -154,7 +154,7 @@ def get_users(db: Session = Depends(get_db)):
 async def upload_syllabus(user_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
     contents = await file.read()
 
-    from backend.syllabus import parse_pdf
+    from syllabus import parse_pdf
     syllabus_dict = parse_pdf(contents)
     syllabus = Syllabus(filename=file.filename, content=json.dumps(syllabus_dict), user_id=user_id)
     db.add(syllabus)
@@ -485,13 +485,14 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
 
     Task 2: <the name of the task>
     Description: description of the task
+    
     """
 
     if week_num and topic_from_week:
         prompt = base + (
             f"You are a Python tutor.\n"
             f"The student is asking about Week {week_num} — '{topic_from_week}'.\n"
-            f"Generate two creative practice tasks for this topic only, no solutions. Before tasks write the {user_level}\n\n"
+            f"Generate two creative practice tasks for this topic only, no solutions. Before tasks write the {user_level}\n\n. After tasks write: In the first line with your solution please indicate task number and name. For example, Task 1: <...>"
             f"Student's message:\n{content}"
         )
     elif week_num is not None and not topic_from_week:
@@ -520,7 +521,7 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         prompt = base + (
             f"You are a Python tutor.\n"
             f"The student mentioned the topic: '{found_topic}', which exists in the syllabus.\n"
-            f"Generate two practice tasks for this topic only without solutions. Before tasks write the {user_level}\n\n"
+            f"Generate two practice tasks for this topic only without solutions. Before tasks write the {user_level}\n\n. After tasks write: In the first line with your solution please indicate task number and name. For example, Task 1: <...>"
             f"Student's message:\n{content}"
         )
     else:
@@ -748,7 +749,7 @@ def send_code(email: EmailStr = Query(...), db: Session = Depends(get_db)):
 
     db.commit()
     try:
-        from backend.email_utils import send_reminder_email
+        from email_utils import send_reminder_email
         send_reminder_email(email, "User", code)
     except Exception as e:
         print("Error sending email:", e)
@@ -961,7 +962,7 @@ def delete_session(session_id: int, db: Session = Depends(get_db)):
 
 class NotificationSettings(BaseModel):
     email_notifications: bool
-    weekly_report: bool
+   #weekly_report:
 
 @app.post("/profile/{user_id}/notifications")
 def update_notifications(user_id: int, data: NotificationSettings, db: Session = Depends(get_db)):
@@ -969,6 +970,6 @@ def update_notifications(user_id: int, data: NotificationSettings, db: Session =
     if not user:
         raise HTTPException(404, "User not found")
     user.email_notifications = 1 if data.email_notifications else 0
-    user.weekly_report = 1 if data.weekly_report else 0
+
     db.commit()
     return {"message": "Settings updated"}
