@@ -103,6 +103,14 @@ export default function ChatPage() {
     const isLikelyCode = text => /Task\s*\d+:/.test(text);
 
     const submitSolution = async (code) => {
+        // 1. сразу пушим ваше сообщение и placeholder
+        setMessages(prev => [
+            ...prev,
+            { sender: 'user', text: code },
+            { sender: 'bot',  text: 'loading' }
+        ]);
+        scrollToBottom();
+
         try {
             const res = await fetch('http://127.0.0.1:8000/submit_solution', {
                 method: 'POST',
@@ -122,10 +130,32 @@ export default function ChatPage() {
                 throw new Error(errMsg);
             }
 
-            await fetchChatHistory(sessionId);
+            // 2. заменяем последнее сообщение (loading) на ответ нейросети
+            setMessages(prev => {
+                const copy = [...prev];
+                copy[copy.length - 1] = {
+                    sender: 'bot',
+                    text: data.evaluation  // или data.reply, как у вас названо поле
+                };
+                return copy;
+            });
+            scrollToBottom();
+
+            // 3. вытягиваем обновлённое имя сессии, если нужно
+            await fetchSessionList();
+
         } catch (err) {
             console.error(err);
-            setMessages(prev => [...prev, { sender: 'bot', text: err.message }]);
+            // В случае ошибки тоже уберём loading и покажем текст ошибки
+            setMessages(prev => {
+                const copy = [...prev];
+                // заменяем последний loading
+                copy[copy.length - 1] = {
+                    sender: 'bot',
+                    text: err.message
+                };
+                return copy;
+            });
             scrollToBottom();
         }
     };
@@ -196,6 +226,8 @@ export default function ChatPage() {
                 });
                 scrollToBottom();
             }
+            await fetchSessionList()
+
         } catch (err) {
             if (err.name !== 'AbortError') {
                 setMessages(prev => [...prev, { sender: 'bot', text: '⚠️ AI error: could not respond.' }]);
