@@ -5,7 +5,7 @@ import logo from '../assets/logo.svg';
 import chatMenuIcon from '../assets/chat-menu-icon.svg';
 import newChatIcon from '../assets/new-chat-icon.svg';
 
-export function TopBar({ onLogout, forceShowLogout = false, isSidebarOpen, onMenuClick }) {
+export function TopBar({ onLogout, forceShowLogout = false, isSidebarOpen, onMenuClick, onNewChat }) {
     const navigate   = useNavigate();
     const location   = useLocation();
     const isLoggedIn = Boolean(localStorage.getItem('user_id'));
@@ -48,6 +48,7 @@ export function TopBar({ onLogout, forceShowLogout = false, isSidebarOpen, onMen
                                 src={newChatIcon}
                                 alt="New Chat"
                                 className="top-icon"
+                                onClick={onNewChat}
                             />
                         </>
                     )

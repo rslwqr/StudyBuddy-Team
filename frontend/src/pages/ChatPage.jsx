@@ -260,9 +260,25 @@ export default function ChatPage() {
         }
     };
 
+    // Вынесенная функция создания нового чата
+    const handleNewChat = async () => {
+        const res = await fetch('http://127.0.0.1:8000/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id }),
+        });
+        const data = await res.json();
+
+        setSessionId(data.session_id);
+        setMessages([]);
+        localStorage.setItem('session_id', data.session_id);
+
+        await fetchSessionList();
+    };
+
     return (
         <div className="chat-layout">
-            <TopBar onMenuClick={() => setIsSidebarOpen(true)} isSidebarOpen={isSidebarOpen} />
+            <TopBar onMenuClick={() => setIsSidebarOpen(true)} isSidebarOpen={isSidebarOpen} onNewChat={handleNewChat} />
             <ChatSidebar
                 chatSessions={chatSessions}
                 activeSessionId={sessionId}
