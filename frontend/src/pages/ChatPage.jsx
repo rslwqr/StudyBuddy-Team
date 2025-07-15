@@ -7,6 +7,7 @@ import ChatSidebar from '../pages/ChatSidebar';
 
 import sendButtonIcon from '../assets/send-button.svg';
 import stopButtonIcon from '../assets/stop-button.svg';
+import hintButtonIcon from '../assets/hint-button.svg';
 
 export default function ChatPage() {
     const [messages, setMessages] = useState([]);
@@ -16,6 +17,8 @@ export default function ChatPage() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [sessionId, setSessionId] = useState(null);
     const [chatSessions, setChatSessions] = useState([]);
+    const [showHintButton, setShowHintButton] = useState(false);
+    const [awaitingHintTask, setAwaitingHintTask] = useState(false);
 
     const abortControllerRef = useRef(null);
     const textareaRef = useRef(null);
@@ -74,6 +77,20 @@ export default function ChatPage() {
             fetchChatHistory(+existingSession);
         }
     }, [user_id, syllabus_id]);
+
+    useEffect(() => {
+        // Show hint button only if the last bot message contains both Task 1 and Task 2
+        if (messages.length > 0) {
+            const lastBotMessage = [...messages].reverse().find(m => m.sender === 'bot' && m.text && m.text !== 'loading');
+            if (lastBotMessage && lastBotMessage.text.includes('Task 1:') && lastBotMessage.text.includes('Task 2:')) {
+                setShowHintButton(true);
+            } else {
+                setShowHintButton(false);
+            }
+        } else {
+            setShowHintButton(false);
+        }
+    }, [messages]);
 
     const isLikelyCode = text => /Task\s*\d+:/.test(text);
 
@@ -174,12 +191,33 @@ export default function ChatPage() {
         }
     };
 
+    const handleHintClick = () => {
+        setMessages(prev => [
+            ...prev,
+            { sender: 'bot', text: 'For which task do you want a hint? Please send the FULL task name.' }
+        ]);
+        setAwaitingHintTask(true);
+        scrollToBottom();
+    };
+
     const handleSend = async () => {
         const txt = input.trim();
         if (!txt) return;
 
         setInput('');
         if (textareaRef.current) textareaRef.current.style.height = 'auto';
+
+        if (awaitingHintTask) {
+            // User sent the task name for the hint
+            setAwaitingHintTask(false);
+            setMessages(prev => [
+                ...prev,
+                { sender: 'user', text: txt }
+            ]);
+            // Send a special request for a hint (TODO: implement on backend)
+            await sendMessage(`/hint ${txt}`);
+            return;
+        }
 
         if (isLikelyCode(txt)) {
             await submitSolution(txt);
@@ -282,6 +320,11 @@ export default function ChatPage() {
                             }}
                             rows={1}
                         />
+                        {showHintButton && !isStreaming && (
+                            <button className="hint-btn" onClick={handleHintClick}>
+                                <img src={hintButtonIcon} alt="Hint" className="chat-icon-button" />
+                            </button>
+                        )}
                         {isStreaming ? (
                             <button className="stop-btn" onClick={() => abortControllerRef.current?.abort()}>
                                 <img src={stopButtonIcon} alt="Stop" className="chat-icon-button" />
