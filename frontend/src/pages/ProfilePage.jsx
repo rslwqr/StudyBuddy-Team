@@ -50,10 +50,20 @@ export default function ProfilePage() {
         }
     };
 
-    const handleSave = () => {
-        console.log({ fullName, email, emailNotif, weeklyReport });
-        alert('Settings saved!');
+    const handleSave = async () => {
+        try {
+            await axios.post(`http://127.0.0.1:8000/profile/${userId}/notifications`, {
+                email_notifications: emailNotif,
+                weekly_report: weeklyReport
+            });
+            alert('Settings saved!');
+        } catch (err) {
+            console.error('Error saving settings', err);
+            alert('Error saving settings');
+        }
     };
+
+
 
     const handleReset = () => {
         setFullName(initialName);

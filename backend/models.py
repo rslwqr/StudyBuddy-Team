@@ -1,9 +1,10 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
 from sqlalchemy.orm import declarative_base, relationship, Mapped, mapped_column
 from datetime import datetime
-from syllabus import parse_pdf
+from backend.syllabus import parse_pdf
 from sqlalchemy import Column, Integer, String, ForeignKey, Text
 from sqlalchemy.orm import relationship
+from sqlalchemy import Boolean
 
 Base = declarative_base()
 
@@ -21,6 +22,10 @@ class User(Base):
     messages = relationship("Message", back_populates="user")
     syllabuses = relationship("Syllabus", back_populates="user")
     solutions = relationship("Solution", back_populates="user")
+
+    email_notifications = Column(Integer, default=0)
+    weekly_report = Column(Integer, default=0)
+
 
 class Syllabus(Base):
     __tablename__ = "syllabuses"

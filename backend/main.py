@@ -1,8 +1,32 @@
 from fastapi import FastAPI
-from models import ChatSession
+from fastapi import Query
+from backend.email_utils import send_reminder_email
+from backend.models import ChatSession
 from fastapi.responses import FileResponse
+from dotenv import load_dotenv
+load_dotenv()
 
 app = FastAPI()
+from apscheduler.schedulers.background import BackgroundScheduler
+from backend.email_utils import send_reminder_email
+from pydantic import BaseModel
+scheduler = BackgroundScheduler()
+
+def send_all_reminders():
+    db = SessionLocal()
+    try:
+        users = db.query(User).filter(User.email_notifications == True).all()
+        for u in users:
+            if u.email.endswith("@innopolis.university"):
+                send_reminder_email(u.email, u.name)
+    finally:
+        db.close()
+
+
+# Каждый день в 10:00
+scheduler.add_job(send_all_reminders, 'cron', hour=15, minute=23)
+scheduler.start()
+
 import datetime
 import json
 import os
@@ -19,9 +43,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm import sessionmaker
-from models import Base, User, Syllabus, Message, EmailCode
-from models import Solution, Task
-from models import Topic
+from backend.models import Base, User, Syllabus, Message, EmailCode
+from backend.models import Solution, Task
+from backend.models import Topic
 from datetime import datetime
 from typing import List
 
@@ -130,7 +154,7 @@ def get_users(db: Session = Depends(get_db)):
 async def upload_syllabus(user_id: int, file: UploadFile = File(...), db: Session = Depends(get_db)):
     contents = await file.read()
 
-    from syllabus import parse_pdf
+    from backend.syllabus import parse_pdf
     syllabus_dict = parse_pdf(contents)
     syllabus = Syllabus(filename=file.filename, content=json.dumps(syllabus_dict), user_id=user_id)
     db.add(syllabus)
@@ -207,7 +231,7 @@ def create_session(data: SessionCreateRequest, db: Session = Depends(get_db)):
     session = ChatSession(
         user_id=data.user_id,
         chat_number=next_number,
-        name=f"Chat {next_number}"  # временно, потом будет обновлено в /chat
+        name=f"Chat {next_number}"
     )
     db.add(session)
     db.commit()
@@ -675,8 +699,12 @@ def delete_syllabus(user_id: int, db: Session = Depends(get_db)):
     return {"message": "Syllabus deleted"}
 
 
+
 @app.post("/send_code")
-def send_code(email: EmailStr, db: Session = Depends(get_db)):
+def send_code(email: EmailStr = Query(...), db: Session = Depends(get_db)):
+    if not email.endswith("@innopolis.university"):
+        raise HTTPException(status_code=400, detail="Only emails with domain @innopolis.university allows")
+
     code = str(random.randint(100000, 999999))
 
     existing = db.query(EmailCode).filter(EmailCode.email == email).first()
@@ -687,9 +715,14 @@ def send_code(email: EmailStr, db: Session = Depends(get_db)):
         db.add(EmailCode(email=email, code=code))
 
     db.commit()
-    print(f"🔐 Your verification code: {code}")
-    return {"message": "Verification code sent to your email"}
+    try:
+        from backend.email_utils import send_reminder_email
+        send_reminder_email(email, "User", code)
+    except Exception as e:
+        print("Error sending email:", e)
 
+    print(f"Your verification code: {code}")
+    return {"message": "Verification code sent to your email"}
 
 class VerifyCodeRequest(BaseModel):
     email: EmailStr
@@ -888,8 +921,22 @@ def delete_session(session_id: int, db: Session = Depends(get_db)):
     if not session:
         raise HTTPException(404, "Session not found")
 
-    # Удаляем все сообщения этой сессии
     db.query(Message).filter(Message.session_id == session_id).delete()
     db.delete(session)
     db.commit()
     return {"message": "Session deleted"}
+
+
+class NotificationSettings(BaseModel):
+    email_notifications: bool
+    weekly_report: bool
+
+@app.post("/profile/{user_id}/notifications")
+def update_notifications(user_id: int, data: NotificationSettings, db: Session = Depends(get_db)):
+    user = db.query(User).get(user_id)
+    if not user:
+        raise HTTPException(404, "User not found")
+    user.email_notifications = 1 if data.email_notifications else 0
+    user.weekly_report = 1 if data.weekly_report else 0
+    db.commit()
+    return {"message": "Settings updated"}
