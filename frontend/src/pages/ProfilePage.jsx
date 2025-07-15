@@ -54,7 +54,7 @@ export default function ProfilePage() {
         try {
             await axios.post(`http://127.0.0.1:8000/profile/${userId}/notifications`, {
                 email_notifications: emailNotif,
-                weekly_report: weeklyReport
+
             });
             alert('Settings saved!');
         } catch (err) {
@@ -69,7 +69,6 @@ export default function ProfilePage() {
         setFullName(initialName);
         setEmail(initialEmail);
         setEmailNotif(false);
-        setWeeklyReport(false);
     };
 
     return (
@@ -122,18 +121,8 @@ export default function ProfilePage() {
                             </div>
 
                             <div className="toggle-row">
-                                <div className="toggle-info">
-                                    <div className="toggle-label">Weekly Progress Reports</div>
-                                    <div className="toggle-desc">Summary Of Your Learning Activity</div>
-                                </div>
-                                <label className="switch">
-                                    <input
-                                        type="checkbox"
-                                        checked={weeklyReport}
-                                        onChange={() => setWeeklyReport(!weeklyReport)}
-                                    />
-                                    <span className="slider" />
-                                </label>
+
+
                             </div>
 
                             <div className="buttons-row">
