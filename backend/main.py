@@ -588,8 +588,40 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
         session_id=session_id
     ).order_by(Message.timestamp).all()
 
+    # --- HINT BUTTON: handle /hint <task name> command ---
+    if content.strip().lower().startswith('/hint '):
+        task_name = content.strip()[6:].strip()
+        matched_task = db.query(Task).filter(Task.description.ilike(f"%{task_name}%")).first()
+        if not matched_task:
+            reply = f"Task '{task_name}' not found. Please check the task name."
+        else:
+            hint_prompt = (
+                f"You are a Python tutor.\n"
+                f"The student wants a hint for the task:\n{matched_task.description}\n"
+                f"Please give them a helpful but not full solution hint."
+            )
+            ai_data = {
+                "model": "deepseek/deepseek-r1-0528-qwen3-8b:free",
+                "messages": [{"role": "user", "content": hint_prompt}]
+            }
+            try:
+                response = requests.post(API_URL, json=ai_data, headers=headers)
+                response.raise_for_status()
+                reply = response.json()["choices"][0]["message"]["content"]
+            except:
+                reply = "Failed to generate a hint right now."
+        msg_bot = Message(sender="bot", content=reply, user_id=user_id, syllabus_id=syllabus_id, session_id=session_id)
+        db.add(msg_bot)
+        db.commit()
+        chat_history = db.query(Message).filter_by(session_id=session_id).order_by(Message.timestamp).all()
+        return {
+            "reply": reply,
+            "chat_history": [{"sender": m.sender, "content": m.content, "time": m.timestamp} for m in chat_history]
+        }
+    # --- END HINT BUTTON ---
 
-    if content.strip().lower() in ["i want a hint", "hint", "give me a hint"]:
+    # --- HINT after fail: support 'yes' as well as 'hint' ---
+    if content.strip().lower() in ["i want a hint", "hint", "give me a hint", "yes"]:
         session = db.query(ChatSession).filter_by(id=session_id).first()
         if session and session.last_failed_task_id:
             task = db.query(Task).get(session.last_failed_task_id)

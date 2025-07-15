@@ -78,11 +78,19 @@ export default function ChatPage() {
         }
     }, [user_id, syllabus_id]);
 
+    // Show hint button only if the last bot message contains both Task 1 and Task 2
     useEffect(() => {
-        // Show hint button only if the last bot message contains both Task 1 and Task 2
         if (messages.length > 0) {
             const lastBotMessage = [...messages].reverse().find(m => m.sender === 'bot' && m.text && m.text !== 'loading');
-            if (lastBotMessage && lastBotMessage.text.includes('Task 1:') && lastBotMessage.text.includes('Task 2:')) {
+            if (
+                lastBotMessage &&
+                (
+                    (lastBotMessage.text.includes('Task 1:') && lastBotMessage.text.includes('Task 2:')) ||
+                    lastBotMessage.text.toLowerCase().includes('would you like a hint') ||
+                    lastBotMessage.text.toLowerCase().includes('do you want a hint') ||
+                    lastBotMessage.text.toLowerCase().includes('hint')
+                )
+            ) {
                 setShowHintButton(true);
             } else {
                 setShowHintButton(false);
@@ -142,12 +150,19 @@ export default function ChatPage() {
             }
         }
 
-        // Add user's message and loading placeholder
-        setMessages(prev => [
-            ...prev,
-            { sender: 'user', text: content },
-            { sender: 'bot', text: 'loading' }
-        ]);
+        // If this is a /hint ... command, do not add it as a user message
+        if (content.startsWith('/hint ')) {
+            setMessages(prev => [
+                ...prev,
+                { sender: 'bot', text: 'loading' }
+            ]);
+        } else {
+            setMessages(prev => [
+                ...prev,
+                { sender: 'user', text: content },
+                { sender: 'bot', text: 'loading' }
+            ]);
+        }
         scrollToBottom();
 
         const ctrl = new AbortController();
@@ -192,12 +207,23 @@ export default function ChatPage() {
     };
 
     const handleHintClick = () => {
-        setMessages(prev => [
-            ...prev,
-            { sender: 'bot', text: 'For which task do you want a hint? Please send the FULL task name.' }
-        ]);
-        setAwaitingHintTask(true);
-        scrollToBottom();
+        const lastBotMessage = [...messages].reverse().find(m => m.sender === 'bot' && m.text && m.text !== 'loading');
+        const isBotOfferingHint = lastBotMessage && (
+            lastBotMessage.text.toLowerCase().includes('would you like a hint') ||
+            lastBotMessage.text.toLowerCase().includes('do you want a hint') ||
+            lastBotMessage.text.toLowerCase().includes('hint')
+        );
+        if (isBotOfferingHint) {
+            // Immediately request a hint for the last failed task
+            sendMessage('hint');
+        } else {
+            setMessages(prev => [
+                ...prev,
+                { sender: 'bot', text: 'For which task do you want a hint? Please send the FULL task name.' }
+            ]);
+            setAwaitingHintTask(true);
+            scrollToBottom();
+        }
     };
 
     const handleSend = async () => {
@@ -214,7 +240,7 @@ export default function ChatPage() {
                 ...prev,
                 { sender: 'user', text: txt }
             ]);
-            // Send a special request for a hint (TODO: implement on backend)
+            // Just send the /hint ... to backend, do not add it to messages
             await sendMessage(`/hint ${txt}`);
             return;
         }
