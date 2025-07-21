@@ -33,7 +33,7 @@ export default function ChatPage() {
 
     const fetchChatHistory = async (sessId) => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/chat_history/${sessId}`);
+            const res = await fetch(`https://studybuddy-team-production.up.railway.app/chat_history/${sessId}`);
             if (res.ok) {
                 const history = await res.json();
                 const formatted = history.map(m => ({
