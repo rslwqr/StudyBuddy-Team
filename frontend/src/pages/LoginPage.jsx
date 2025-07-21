@@ -15,7 +15,7 @@ export default function LoginPage() {
         e.preventDefault();
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/login_with_password', {
+            const res = await fetch('https://studybuddy-team-production.up.railway.app/login_with_password', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password }),
