@@ -30,7 +30,7 @@ export function LevelPage() {
     // 1) при монтировании подгружаем текущий уровень
     useEffect(() => {
         if (!userId) return;
-        fetch(`http://127.0.0.1:8000/profile/${userId}/difficulty`)
+        fetch(`https://studybuddy-team-production.up.railway.app/profile/${userId}/difficulty`)
             .then(res => res.ok ? res.json() : Promise.reject())
             .then(data => {
                 if (data.difficulty) setSelectedLevel(data.difficulty);
@@ -50,7 +50,7 @@ export function LevelPage() {
         if (!userId || !selectedLevel) return;
         setLoading(true);
 
-        fetch(`http://127.0.0.1:8000/profile/${userId}/difficulty`, {
+        fetch(`https://studybuddy-team-production.up.railway.app/profile/${userId}/difficulty`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ difficulty: selectedLevel })
