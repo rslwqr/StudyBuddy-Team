@@ -50,7 +50,7 @@ export default function ChatPage() {
 
     const fetchSessionList = async () => {
         try {
-            const res = await fetch(`http://127.0.0.1:8000/user_sessions/${user_id}`);
+            const res = await fetch(`https://studybuddy-team-production.up.railway.app/user_sessions/${user_id}`);
             const data = await res.json();
             setChatSessions(data);
             localStorage.setItem('chat_sessions', JSON.stringify(data));
@@ -112,7 +112,7 @@ export default function ChatPage() {
         scrollToBottom();
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/submit_solution', {
+            const res = await fetch('https://studybuddy-team-production.up.railway.app/submit_solution', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -164,7 +164,7 @@ export default function ChatPage() {
         if (!sessionId) {
             // Create session dynamically
             try {
-                const res = await fetch('http://127.0.0.1:8000/sessions', {
+                const res = await fetch('https://studybuddy-team-production.up.railway.app/sessions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id }),
@@ -200,7 +200,7 @@ export default function ChatPage() {
         setIsStreaming(true);
 
         try {
-            const res = await fetch('http://127.0.0.1:8000/chat', {
+            const res = await fetch('https://studybuddy-team-production.up.railway.app/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -294,7 +294,7 @@ export default function ChatPage() {
 
     // Вынесенная функция создания нового чата
     const handleNewChat = async () => {
-        const res = await fetch('http://127.0.0.1:8000/sessions', {
+        const res = await fetch('https://studybuddy-team-production.up.railway.app/sessions', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ user_id }),
@@ -321,7 +321,7 @@ export default function ChatPage() {
                     setIsSidebarOpen(false);
                 }}
                 onNewChat={async () => {
-                    const res = await fetch('http://127.0.0.1:8000/sessions', {
+                    const res = await fetch('https://studybuddy-team-production.up.railway.app/sessions', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ user_id }),
@@ -339,7 +339,7 @@ export default function ChatPage() {
                     if (!confirmed) return;
 
                     try {
-                        await fetch(`http://127.0.0.1:8000/sessions/${chatIdToDelete}`, { method: 'DELETE' });
+                        await fetch(`https://studybuddy-team-production.up.railway.app/sessions/${chatIdToDelete}`, { method: 'DELETE' });
                         await fetchSessionList();
 
                         if (sessionId === chatIdToDelete) {
