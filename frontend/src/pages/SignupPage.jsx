@@ -29,7 +29,7 @@ export default function SignupPage() {
             if (password !== confirmPassword) return alert('Passwords do not match')
 
             try {
-                const res = await fetch(`http://127.0.0.1:8000/send_code?email=${encodeURIComponent(email)}`, {
+                const res = await fetch(`https://studybuddy-team-production.up.railway.app/send_code?email=${encodeURIComponent(email)}`, {
                     method: 'POST'
                 })
 
@@ -50,7 +50,7 @@ export default function SignupPage() {
             if (!verificationCode.trim()) return alert('Please enter the verification code')
 
             try {
-                const res = await fetch('http://127.0.0.1:8000/verify_code_and_register', {
+                const res = await fetch('https://studybuddy-team-production.up.railway.app/verify_code_and_register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
