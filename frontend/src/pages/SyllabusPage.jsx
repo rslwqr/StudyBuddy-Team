@@ -13,7 +13,7 @@ export function SyllabusPage() {
     useEffect(() => {
         const fetchSyllabus = async () => {
             try {
-                const res = await fetch(`http://127.0.0.1:8000/download_syllabus?user_id=${userId}`);
+                const res = await fetch(`https://studybuddy-team-production.up.railway.app/download_syllabus?user_id=${userId}`);
                 if (res.ok) {
                     setPdfUploaded(true);
                     setUploadedFileName('Name_of_syllabus_file.pdf'); // можно заменить на имя из API
@@ -39,7 +39,7 @@ export function SyllabusPage() {
         form.append('file', file);
 
         try {
-            const res = await fetch(`http://127.0.0.1:8000/upload_syllabus?user_id=${userId}`, {
+            const res = await fetch(`https://studybuddy-team-production.up.railway.app/upload_syllabus?user_id=${userId}`, {
                 method: 'POST',
                 body: form,
             });
@@ -57,7 +57,7 @@ export function SyllabusPage() {
 
     const handleRemove = async () => {
         try {
-            await fetch(`http://127.0.0.1:8000/syllabus?user_id=${userId}`, {
+            await fetch(`https://studybuddy-team-production.up.railway.app/syllabus?user_id=${userId}`, {
                 method: 'DELETE',
             });
             setPdfUploaded(false);
