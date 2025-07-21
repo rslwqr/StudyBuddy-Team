@@ -21,7 +21,7 @@ export default function ProfilePage() {
     useEffect(() => {
         if (!userId) return;
         axios
-            .get(`http://127.0.0.1:8000/profile/${userId}/difficulty`)
+            .get(`https://studybuddy-team-production.up.railway.app/profile/${userId}/difficulty`)
             .then(res => {
                 if (res.data.difficulty) {
                     setCurrentLevel(res.data.difficulty);
@@ -36,7 +36,7 @@ export default function ProfilePage() {
     useEffect(() => {
         if (!userId) return;
         axios
-            .get(`http://127.0.0.1:8000/user_progress/${userId}`)
+            .get(`https://studybuddy-team-production.up.railway.app/user_progress/${userId}`)
             .then(res => setProgress(res.data.progress_percentage))
             .catch(err => console.error('Error fetching user progress:', err));
     }, [userId]);
@@ -52,7 +52,7 @@ export default function ProfilePage() {
 
     const handleSave = async () => {
         try {
-            await axios.post(`http://127.0.0.1:8000/profile/${userId}/notifications`, {
+            await axios.post(`https://studybuddy-team-production.up.railway.app/profile/${userId}/notifications`, {
                 email_notifications: emailNotif,
 
             });
