@@ -50,8 +50,8 @@ from datetime import datetime
 from typing import List
 
 load_dotenv()
-API_KEY = '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'
-API_URL = 'https://openrouter.ai/api/v1/chat/completions'
+API_KEY = cool
+API_URL = cool2
 
 DATABASE_URL = "sqlite:///studybuddy1.db"
 engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
